@@ -1,65 +1,65 @@
 
-5G Broadcast Expe; 5G
-5G NR 26 GHz Expe; 5G
-5G NR 3400-3800 Expe; 5G
-ADS-B; radio (avion)
-AIS; radio (bateau)
-AIS/GPS; navigation bateau
-ANA; ?
-ANM; Station d'aide à la navigation maritime
-ANT; radio (domestique/sport)
-BLR 26 GHZ; Boucle locale radio
-BLR 3 GHz; Boucle locale radio
-BLR LTE 3500; 4G
-COM AERTER; ?
-COM MAR; communications maritimes et fluviales
-COM TER; communications terrestres
-DME; distance measuring equipment (aviation)
-EM; radio?
-EM/REC; ?
-ER HF; radio
-FH; faisceau hertzien
-FH ABI; faiseceau hertzien Abonné isolé
-FM; Radiodiffusion en modulation de fréquence
-GALILEO; GPS
-GONIO; 
-GPS
-GPS D
-GSM 1800
-GSM 1800/GSM 900
-GSM 900
-GSM 900/GSM 1800
-GSM R
-LTE 1400 Expe
-LTE 1800
-LTE 2100
-LTE 2600
-LTE 700
-LTE 800
-PMR
-RADIOASTRO
-RDF AM
-RDF DVB-T
-RDF T-DAB
-RDF TV-AN
-RDR
-RDR COT
-RDR MTO
-RDR PFL
-REC
-RMU-POCSAG
-RS
-RS/TELEM
-SAT
-SAT GEO
-SAT NGEO
-TELECD
-TELECD/TELEM
-TELEM
-TELEM/TELECD
-TETRA
-TETRAPOL
-UMTS 2100
-UMTS 2100/UMTS 900
-UMTS 900
-VOR-C
+5G Broadcast Expe;5G
+5G NR 26 GHz Expe;5G
+5G NR 3400-3800 Expe;5G
+ADS-B;radio (avion)
+AIS;radio (bateau)
+AIS/GPS;navigation bateau
+ANA;?
+ANM;Station d'aide à la navigation maritime
+ANT;radio (domestique/sport)
+BLR 26 GHZ;Boucle locale radio
+BLR 3 GHz;Boucle locale radio
+BLR LTE 3500;4G
+COM AERTER;?
+COM MAR;communications maritimes et fluviales
+COM TER;communications terrestres
+DME;distance measuring equipment (aviation)
+EM;radio?
+EM/REC;?
+ER HF;radio
+FH;faisceau hertzien
+FH ABI;faiseceau hertzien Abonné isolé
+FM;Radiodiffusion en modulation de fréquence
+GALILEO;GPS
+GONIO;Station de goniométrie
+GPS;GPS
+GPS D;GPS
+GSM 1800;2iG
+GSM 1800/GSM 900;2G/1G
+GSM 900;1G
+GSM 900/GSM 1800;1G/2G
+GSM R;	Radiotéléphonie numérique pour le Réseau Ferré
+LTE 1400 Expe;4G
+LTE 1800;4G
+LTE 2100;4G
+LTE 2600;4G
+LTE 700;4G
+LTE 800;4G
+PMR;Station d'un réseau privé
+RADIOASTRO;Station de radioastronomie
+RDF AM;Radiodiffusion sonore en modulation d'amplitude
+RDF DVB-T;Radiodiffusion TV numérique de terre, service TV dans le protocole de mesure
+RDF T-DAB;Radiodiffusion sonore numérique terrestre
+RDF TV-AN; radiodiffusion ?
+RDR;radar
+RDR COT;radar cotier
+RDR MTO;radar meteo
+RDR PFL;radar (potentielement navigation maritime)
+REC;?
+RMU-POCSAG;Radiomessagerie
+RS;Radio sonde
+RS/TELEM;Radio sonde/Station de télémesure
+SAT;Station terrienne standard
+SAT GEO;Station terrienne vers satellites géostationnaires
+SAT NGEO;Station terrienne vers satellites non géostationnaires
+TELECD;Télécommande d'appareillage
+TELECD/TELEM;Télécommande d'appareillage/Station de télémesure
+TELEM;Station de télémesure
+TELEM/TELECD;Station de télémesure/Télécommande d'appareillage 
+TETRA;Réseau privé à la norme TETRA
+TETRAPOL;defence et securité
+UMTS 2100;3G
+UMTS 2100/UMTS 900;3G
+UMTS 900;3G
+VOR-C;navigation aérienne
