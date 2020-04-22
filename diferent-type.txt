@@ -1,29 +1,28 @@
 
-5G Broadcast Expe
-5G NR 26 GHz Expe
-5G NR 3400-3800 Expe
-ADS-B
-AIS
-AIS/GPS
-ANA
-ANM
-ANT
-BLR 26 GHZ
-BLR 3 GHz
-BLR 3 GHZ
-BLR LTE 3500
-COM AERTER
-COM MAR
-COM TER
-DME
-EM
-EM/REC
-ER HF
-FH
-FH ABI
-FM
-GALILEO
-GONIO
+5G Broadcast Expe; 5G
+5G NR 26 GHz Expe; 5G
+5G NR 3400-3800 Expe; 5G
+ADS-B; radio (avion)
+AIS; radio (bateau)
+AIS/GPS; navigation bateau
+ANA; ?
+ANM; Station d'aide à la navigation maritime
+ANT; radio (domestique/sport)
+BLR 26 GHZ; Boucle locale radio
+BLR 3 GHz; Boucle locale radio
+BLR LTE 3500; 4G
+COM AERTER; ?
+COM MAR; communications maritimes et fluviales
+COM TER; communications terrestres
+DME; distance measuring equipment (aviation)
+EM; radio?
+EM/REC; ?
+ER HF; radio
+FH; faisceau hertzien
+FH ABI; faiseceau hertzien Abonné isolé
+FM; Radiodiffusion en modulation de fréquence
+GALILEO; GPS
+GONIO; 
 GPS
 GPS D
 GSM 1800
