@@ -14,10 +14,10 @@ listMobileHolder = set()
 for element in ["EMETTEUR", "STATION", "ANTENNE", "SUPPORT"]:
     print(element)
     cpt = 0
-    with open('SUP_'+element+'.txt', 'r', encoding='latin-1') as supFile:
+    with open('tables/SUP_'+element+'.txt', 'r', encoding='latin-1') as supFile:
         fileReader = csv.reader(supFile, delimiter=';')
 
-        with open('MOBILE_'+element+'.txt', 'w') as newFile:
+        with open('tables/MOBILE_'+element+'.txt', 'w') as newFile:
             newFileWriter = csv.writer(newFile, delimiter=';')
             for row in fileReader:
 
