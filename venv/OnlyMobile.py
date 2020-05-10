@@ -19,6 +19,7 @@ for element in ["EMETTEUR", "STATION", "ANTENNE", "SUPPORT"]:
 
         with open('tables/MOBILE_'+element+'.txt', 'w') as newFile:
             newFileWriter = csv.writer(newFile, delimiter=';')
+            newFileWriter.writerow(next(fileReader))
             for row in fileReader:
 
                 # EMITTER FILE
