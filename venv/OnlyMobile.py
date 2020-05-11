@@ -1,4 +1,8 @@
 import csv
+import time
+
+# Start time exec
+start_time = time.time()
 
 # Initialize the list of mobile telephone emitter type (trie.txt)
 with open('../trie.txt', newline='') as trieFile:
@@ -51,3 +55,6 @@ for element in ["EMETTEUR", "STATION", "ANTENNE", "SUPPORT"]:
                         newFileWriter.writerow(row)
 
     print(cpt, ' lines written\n----------------------')
+
+# Show execution time
+print("Temps d execution : %s secondes ---" % (time.time() - start_time))
