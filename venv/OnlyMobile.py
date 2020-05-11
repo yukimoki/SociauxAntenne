@@ -5,7 +5,7 @@ import time
 start_time = time.time()
 
 # Initialize the list of mobile telephone emitter type (trie.txt)
-with open('../trie.txt', newline='') as trieFile:
+with open('typeEMRfilter.txt', newline='') as trieFile:
     typeMobile = trieFile.read().splitlines()
 
 # list of mobile telephone emitter & station/antenna/holder with > 1 mobile telephone emitter

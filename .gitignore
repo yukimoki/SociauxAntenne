@@ -1,6 +1,5 @@
 # All db files
-MOBILE_*
-SUP_*
+tables/
 
 # IDE
 .idea/
