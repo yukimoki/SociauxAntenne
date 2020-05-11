@@ -46,7 +46,7 @@ for element in ["EMETTEUR", "STATION", "ANTENNE", "SUPPORT"]:
 
                 # HOLDER FILES
                 else:
-                    if row[0] in listMobileHolder:
+                    if (row[0] in listMobileHolder) and (row[1] in listMobileStation):
                         cpt += 1
                         newFileWriter.writerow(row)
 
