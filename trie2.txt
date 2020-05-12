@@ -2,4 +2,3 @@
 GSM
 LTE
 UMTS
-
