@@ -2,7 +2,7 @@
 
 # OnlyMobile.py
 
-! the script must be executed in his own dir
+! the script must be executed with pyton3 in his own dir
 
 The script takes all *SUP_\** tables in tables dir and wrtite new ones *MOBILE_\** in the same dir.
 New tables only include emitters with type is in *typeEMRfilter.txt* or other elements holding this type of emitter.
