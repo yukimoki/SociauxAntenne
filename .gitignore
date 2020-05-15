@@ -1,6 +1,7 @@
 # All db files
 tables/
 carres/
+departements-contour/
 
 # IDE
 .idea/
