@@ -2,6 +2,7 @@
 tables/
 carres/
 departements-contour/
+finalDB/
 
 # IDE
 .idea/
