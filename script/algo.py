@@ -16,21 +16,21 @@ def init_files():
     Init file content in dictionary
     :return:
     """
-    with open('../generateTables/tables/finalDB/SUPPORT.csv', 'r') as supports_file:
+    with open('tables/finalDB/SUPPORT.csv', 'r') as supports_file:
         reader_csv = csv.reader(supports_file, delimiter=';')
         supports = {}
         next(reader_csv)
         for row in reader_csv:
             supports[row[0]] = [row[1], row[2], row[5]]
 
-    with open('depart_limitrophe.txt', 'r') as departs_file:
+    with open('tables/depart_limitrophe.txt', 'r') as departs_file:
         reader_csv = csv.reader(departs_file, delimiter=':')
         departs = {}
         for row in reader_csv:
             departs[row[0]] = row[1].split(',')
 
     for num_name in range(0, 2200000, 100000):
-        with open('carres/carres'+i+'.csv', 'r') as carres_file:
+        with open('tables/carres/carres'+i+'.csv', 'r') as carres_file:
             reader_csv = csv.reader(carres_file, delimiter=';')
             carres = {}
             next(reader_csv)
@@ -46,9 +46,9 @@ def departs_shape():
     dept.crs = 'epsg:4326'
 
     polys = []
-    for num_name in range(0, 2200000, 100000):
+    for num_name in range(0, 2200000, 1000000):
         print("Extract square form carres",num_name,".csv")
-        with open('carres/carres'+str(num_name)+'.csv') as carre_file:
+        with open('tables/carres/carres'+str(num_name)+'.csv') as carre_file:
             csv_reader = csv.reader(carre_file, delimiter=';')
             next(csv_reader)
             for row in csv_reader:
