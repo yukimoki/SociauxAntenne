@@ -80,6 +80,7 @@ def departs_shape():
     print("Ploted!")
     print("Temps d execution : %s secondes ---" % (time.time() - start_time))
     plt.show()
+    return gdf_carre
 
 def getAntenna(carre):
     tab_antenna_near = []
@@ -87,27 +88,31 @@ def getAntenna(carre):
 
     for i in range(1,4,2):
         for j in range(1,4,2):
-            n = next(i/4*lati, j/4*longi)# def next
+            n = nextTo(i/4*lati, j/4*longi)# def next
             tab_antenna.append(n[0])
             tab_antenna_near += n[1]
-    tab_antenna_near = uniq(tab_antenna_near)
-    tab_antenna = uniq(tab_antenna)
+    tab_antenna_near = unique(tab_antenna_near)
+    tab_antenna = unique(tab_antenna)
     return [tab_antenna, len(tab_antenna_near)]
 
-def uniq(tab):
+def unique(tab):
     r =[]
     for item in tab: 
         if item not in r: 
             r.append(item)
     return r
 
-def next(x, y):
-    
+def nextTo(x, y):
+    snap_dist = 0.00000005
+    candidates = right_df.loc[right_df.intersects(geom[left_df.geometry.name].buffer(search_dist))]
+
+    return None
 
 # Start time exec
 start_time = time.time()
 
-departs_shape()
+geo_data_frame_carre = departs_shape()
+
 
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
