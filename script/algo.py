@@ -46,7 +46,8 @@ def departs_shape():
     dept.crs = 'epsg:4326'
 
     polys = []
-    for num_name in range(0, 2200000, 1000000):
+        #un zero de plus pour moin de données
+    for num_name in range(0, 2200001, 1000000):
         print("Extract square form carres",num_name,".csv")
         with open('tables/carres/carres'+str(num_name)+'.csv') as carre_file:
             csv_reader = csv.reader(carre_file, delimiter=';')
@@ -66,14 +67,42 @@ def departs_shape():
     selected_col = ['code_insee', 'geometry']
     dept = dept[selected_col]
 
+    print("Temps d execution : %s secondes ---" % (time.time() - start_time))
     print("Start join")
-    join = geopandas.sjoin(gdf_carre, dept, how='left', op="within")
+    
+    #join = geopandas.sjoin(gdf_carre, dept, how='left', op="within")
     print("Joined!")
+    print("Temps d execution : %s secondes ---" % (time.time() - start_time))
+    print("Start plot")
     ax = dept.plot(color='White', edgecolor='k', linewidth=0.5)
-    join.plot(column='code_insee', ax=ax)
-
+    #join.plot(column='code_insee', ax=ax)
+    gdf_carre.plot(ax=ax, color='blue', edgecolor='k', linewidth=0.25)
+    print("Ploted!")
+    print("Temps d execution : %s secondes ---" % (time.time() - start_time))
     plt.show()
 
+def getAntenna(carre):
+    tab_antenna_near = []
+    tab_antenna = []   
+
+    for i in range(1,4,2):
+        for j in range(1,4,2):
+            n = next(i/4*lati, j/4*longi)# def next
+            tab_antenna.append(n[0])
+            tab_antenna_near += n[1]
+    tab_antenna_near = uniq(tab_antenna_near)
+    tab_antenna = uniq(tab_antenna)
+    return [tab_antenna, len(tab_antenna_near)]
+
+def uniq(tab):
+    r =[]
+    for item in tab: 
+        if item not in r: 
+            r.append(item)
+    return r
+
+def next(x, y):
+    
 
 # Start time exec
 start_time = time.time()
@@ -81,7 +110,7 @@ start_time = time.time()
 departs_shape()
 
 # Show execution time
-print("Temps d execution : %s secondes ---" % (time.time() - start_time))
+print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
 
     # departs = {}
     # for dept in range(len(sf)):
