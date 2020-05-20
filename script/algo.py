@@ -137,6 +137,7 @@ def get_holder_square(carre, search_dist, holder_gdf, ax=None):
              holder_next_to : (set) of all different id of holders considered as near of the square, only unique id
     """
 
+    square_time = time.time()
     corner_list = carre.exterior.coords[0:4]
     holder_next_to = set()
     holder_closest = []
@@ -147,6 +148,7 @@ def get_holder_square(carre, search_dist, holder_gdf, ax=None):
     x = diag1.intersection(diag2)
 
     for i in range(4):
+        point_time = time.time()
         line = LineString([corner_list[i], (x.x, x.y)])
         src_pt = line.interpolate(0.5, normalized=True)
 
@@ -162,6 +164,7 @@ def get_holder_square(carre, search_dist, holder_gdf, ax=None):
 
         for h in r[1]['ID_SUP']:
             holder_next_to.add(h)
+        print("Temps d execution point: %s secondes ---" % (time.time() - point_time))
 
         # ==================|| Visual ||======================================================== #
         if ax is not None:
@@ -171,15 +174,15 @@ def get_holder_square(carre, search_dist, holder_gdf, ax=None):
             fg = GeoSeries([src_pt, ring_sup, perimeter_max], crs='epsg:4326')
             figure = gpd.GeoDataFrame(geometry=gpd.GeoSeries(fg, crs='epsg:4326'))
             figure.loc[[0], 'geometry'].plot(ax=ax, color='green', zorder=3)
-            figure.loc[[1], 'geometry'].plot(ax=ax, color='pink', zorder=2)
+            figure.loc[[1], 'geometry'].plot(ax=ax, color='pink', alpha=0.5, zorder=2)
             figure.loc[[2], 'geometry'].plot(ax=ax, color='none', edgecolor='green', linewidth=1, zorder=2)
-
         # ======================================================================================= #
 
+    print("Temps d execution carre: %s secondes ---" % (time.time() - square_time))
     return holder_closest, holder_next_to
 
 
-def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist=0.15):
+def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist=0.15): # Paris: 2.207737, 48.921505 180000.csv, # paumé: 15790 140000.csv
     """
     Display a map of French department with all file's squares and informations about the specific square selected.
     Legend: White square = square present in the file
@@ -195,7 +198,6 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     :param search_dist: maximum radius for search in degrees: (float) | 1 degree ~= 111km for lat, 73km for lon
     """
 
-    time_init = time.time()
     polys = []
     with open(file_path) as carre_file:
         csv_reader = csv.reader(carre_file, delimiter=';')
@@ -218,13 +220,10 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     gdf_carre = gpd.GeoDataFrame(geometry=gpd.GeoSeries(series_carre, crs='epsg:4326'))
 
     if lon is not None and lat is not None:
-        carre_to_show = gdf_carre.loc[gdf_carre.geometry.contains(Point(2.207737, 48.921505).buffer(0.00000005))]  # Paris: 2.207737, 48.921505 180000.csv
+        carre_to_show = gdf_carre.loc[gdf_carre.geometry.contains(Point(lon, lat).buffer(0.00000005)), 'geometry']  # Paris: 2.207737, 48.921505 180000.csv | paumé: 15790 140000.csv
 
     else:
-        carre_to_show = gdf_carre.loc[[pos_in_file], 'geometry']  # paumé: 15790 140000.csv
-
-    print("Temps d execution init: %s secondes ---" % (time.time() - time_init))
-
+        carre_to_show = gdf_carre.loc[[pos_in_file], 'geometry']
     ax = gdf_carre.plot(color='none', edgecolor='k', linewidth=0.25, zorder=1)
     carre_to_show.plot(ax=ax, color='blue', edgecolor='k', linewidth=0.25, zorder=2)
 
@@ -248,7 +247,7 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
 
 # Start time exec
 start_time = time.time()
-show_holder_around('tables/carres/carres1400000.csv')
+show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
 
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
