@@ -143,13 +143,13 @@ def create_tables():
             new_holder = [hdr_row[0]]
 
             # Convert coordinates to longitude and latitude on only 2 fields
-            lat = " ".join(hdr_row[3:7]).split(' ')
-            lat = dms_to_degrees(lat[0], lat[1], lat[2], lat[3])
-            new_holder.append(lat)
-
             lon = " ".join(hdr_row[7:11]).split(' ')
             lon = dms_to_degrees(lon[0], lon[1], lon[2], lon[3])
             new_holder.append(lon)
+
+            lat = " ".join(hdr_row[3:7]).split(' ')
+            lat = dms_to_degrees(lat[0], lat[1], lat[2], lat[3])
+            new_holder.append(lat)
 
             new_holder.append(holder_nb_antenna[hdr_row[0]][0])
             new_holder.append(holder_nb_antenna[hdr_row[0]][1])
