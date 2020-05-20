@@ -1,12 +1,14 @@
 # -*-coding: UTF-8 -*
 import csv
+from typing import List, Any
+
 import geopandas as gpd
 import pandas as pd
 from descartes import PolygonPatch
 from geopandas import GeoSeries, GeoDataFrame
 import matplotlib.pyplot as plt
 import rtree
-from shapely.geometry import Polygon, Point
+from shapely.geometry import Polygon, Point, LineString
 import re
 import time
 
@@ -108,32 +110,41 @@ def get_holder_point(src_point, search_dist, holder_gdf):
 
 
 def get_holder_square(carre, search_dist, holder_gdf, ax):
-    perimeter = carre.exterior
+    corner_list = carre.exterior.coords[0:4]
     holder_next_to = set()
     holder_closest = []
 
-    for i in range(1, 4, 2):
-        for j in range(1, 4, 2):
-            x = perimeter.interpolate(i/16, normalized=True).x
-            y = perimeter.interpolate(-j/16, normalized=True).y
-            src_pt = Point(x, y)
+    diag1 = LineString([corner_list[0], corner_list[2]])
+    diag2 = LineString([corner_list[1], corner_list[3]])
 
-            time_pt = time.time()
-            r = get_holder_point(src_pt, search_dist, holder_gdf)
-            print("Temps d execution point: %s secondes ---" % (time.time() - time_pt))
-            holder_closest.append(r[0]['ID_SUP'].iloc[0])
-            r[0].plot(ax=ax, color='red', zorder=4)
+    x = diag1.intersection(diag2)
 
-            for h in r[1]['ID_SUP']:
-                holder_next_to.add(h)
+    for i in range(4):
+        line = LineString([corner_list[i], (x.x, x.y)])
+        src_pt = line.interpolate(0.5, normalized=True)
 
-            perimeter_sup = src_pt.buffer(r[2] + 0.003)
-            perimeter_max = src_pt.buffer((search_dist))
-            fg = GeoSeries([src_pt, perimeter_sup, perimeter_max], crs='epsg:4326')
-            figure = gpd.GeoDataFrame(geometry=gpd.GeoSeries(fg, crs='epsg:4326'))
-            figure.loc[[0], 'geometry'].plot(ax=ax, color='green', zorder=3)
-            figure.loc[[1], 'geometry'].plot(ax=ax, color='none', edgecolor='red', linewidth=1, zorder=3)
-            figure.loc[[2], 'geometry'].plot(ax=ax, color='none', edgecolor='green', linewidth=1, zorder=3)
+    # for i in range(1, 4, 2):
+    #     for j in range(1, 4, 2):
+    #         x = perimeter.interpolate(i/16, normalized=True).x
+    #         y = perimeter.interpolate(-j/16, normalized=True).y
+    #         src_pt = Point(x, y)
+
+        time_pt = time.time()
+        r = get_holder_point(src_pt, search_dist, holder_gdf)
+        print("Temps d execution point: %s secondes ---" % (time.time() - time_pt))
+        holder_closest.append(r[0]['ID_SUP'].iloc[0])
+        r[0].plot(ax=ax, color='red', zorder=4)
+
+        for h in r[1]['ID_SUP']:
+            holder_next_to.add(h)
+
+        perimeter_sup = src_pt.buffer(r[2] + 0.003)
+        perimeter_max = src_pt.buffer((search_dist))
+        fg = GeoSeries([src_pt, perimeter_sup, perimeter_max], crs='epsg:4326')
+        figure = gpd.GeoDataFrame(geometry=gpd.GeoSeries(fg, crs='epsg:4326'))
+        figure.loc[[0], 'geometry'].plot(ax=ax, color='green', zorder=3)
+        figure.loc[[1], 'geometry'].plot(ax=ax, color='none', edgecolor='red', linewidth=1, zorder=3)
+        figure.loc[[2], 'geometry'].plot(ax=ax, color='none', edgecolor='green', linewidth=1, zorder=3)
 
     return holder_closest, holder_next_to
 
@@ -168,7 +179,7 @@ def show_holder_around(src_point, search_dist):
 start_time = time.time()
 time_init = time.time()
 polys = []
-with open('tables/carres/carres1300000.csv') as carre_file:
+with open('tables/carres/carres1800000.csv') as carre_file:
     csv_reader = csv.reader(carre_file, delimiter=';')
     next(csv_reader)
     for row in csv_reader:
@@ -187,10 +198,10 @@ with open('tables/carres/carres1300000.csv') as carre_file:
 series_carre = GeoSeries(polys, crs='epsg:4326')
 
 gdf_carre = gpd.GeoDataFrame(geometry=gpd.GeoSeries(series_carre, crs='epsg:4326'))
-c = gdf_carre.loc[[23191], 'geometry']
-# c = gdf_carre.loc[gdf_carre.geometry.contains(Point(2.207737, 48.921505).buffer(0.00000005))] # Paris: 2.207737, 48.921505 180000.csv | paumé: 5.59196, 47.6434 130000.csv
-ax = gdf_carre.plot(color='none', edgecolor='k', linewidth=0.25, zorder=1)
-c.plot(ax=ax, color='blue', edgecolor='k', linewidth=0.25, zorder=2)
+# c = gdf_carre.loc[[15790], 'geometry']  # paumé: 15790 140000.csv
+c = gdf_carre.loc[gdf_carre.geometry.contains(Point(2.207737, 48.921505).buffer(0.00000005))]  # Paris: 2.207737, 48.921505 180000.csv
+ax = gdf_carre.plot(color='none', edgecolor='k', linewidth=0.25, zorder=2)
+c.plot(ax=ax, color='blue', edgecolor='k', linewidth=0.25, zorder=3)
 
 holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
 geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
@@ -199,7 +210,7 @@ holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
 print("Temps d execution init: %s secondes ---" % (time.time() - time_init))
 
 time_calc = time.time()
-r = get_holder_square(c, 0.1, holder_gdf, ax)
+r = get_holder_square(c['geometry'].iloc[0], 0.1, holder_gdf, ax)
 print("Temps d execution calcule: %s secondes ---" % (time.time() - time_calc))
 
 time_dept = time.time()
@@ -207,7 +218,7 @@ dept = gpd.read_file('departements-contour/departements-20180101.shp')
 dept.crs = 'epsg:4326'
 selected_col = ['code_insee', 'geometry']
 dept = dept[selected_col]
-dept.plot(ax=ax, color='White', edgecolor='k', linewidth=0.5)
+dept.plot(ax=ax, color='White', edgecolor='k', linewidth=0.5, zorder=1)
 
 print("Temps d execution dept: %s secondes ---" % (time.time() - time_dept))
 print(r)
