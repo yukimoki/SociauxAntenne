@@ -94,7 +94,7 @@ def departs_shape():
     return gdf_carre
 
 
-def carresfile_to_dataframe(file_path):
+def carresfile_to_dataframe(file_path, crs='epsg:4326'):
 
     df = pd.read_csv(file_path, sep=';')
     carre_coord = []
@@ -114,13 +114,14 @@ def carresfile_to_dataframe(file_path):
             p = Polygon(p_coord_tab)
             carre_coord.append(p)
 
-    series_carre = GeoSeries(carre_coord, crs='epsg:4326')
+    series_carre = GeoSeries(carre_coord, crs=crs)
 
-    gdf_carre = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries(series_carre, crs='epsg:4326'))
+    gdf_carre = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries(series_carre, crs=crs))
 
     return gdf_carre
 
-def get_holder_point(src_point, search_dist, holder_gdf):
+
+def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
     """
     Find the nearest holder from a specific point,
     then find all the holder present in a field nearly 300 meters further than the nearest support
@@ -145,13 +146,15 @@ def get_holder_point(src_point, search_dist, holder_gdf):
             closest_holder_point = holder_point
 
     closest_holder = holder_gdf.loc[holder_gdf.intersects(closest_holder_point[1].buffer(0.00000005))]
+    closest_holder = closest_holder.to_crs(crs)
 
     holder_near = all_holder.loc[all_holder.intersects(src_point.buffer(distance+0.003))]
+    holder_near = holder_near.to_crs(crs)
 
     return closest_holder, holder_near, distance
 
 
-def get_holder_square(carre, search_dist, holder_gdf, ax=None):
+def get_holder_square(carre, search_dist, holder_gdf, crs='epsg:4326', ax=None):
     """
     Take 4 points in "carre" (square) based on his diagonals and call get_holder_point() for each of them
     Stock the ids of nearest holders in a list of 4 and all ids of holders considered as near ('distance to nearest' + ~300meters)
@@ -183,7 +186,7 @@ def get_holder_square(carre, search_dist, holder_gdf, ax=None):
         #         y = perimeter.interpolate(-j/16, normalized=True).y
         #         src_pt = Point(x, y)
 
-        r = get_holder_point(src_pt, search_dist, holder_gdf)
+        r = get_holder_point(src_pt, search_dist, holder_gdf, crs)
         holder_closest.append(r[0]['ID_SUP'].iloc[0])
 
         for h in r[1]['ID_SUP']:
@@ -198,6 +201,7 @@ def get_holder_square(carre, search_dist, holder_gdf, ax=None):
             perimeter_max = src_pt.buffer(search_dist)
             fg = GeoSeries([src_pt, ring_sup, perimeter_max], crs='epsg:4326')
             figure = gpd.GeoDataFrame(geometry=gpd.GeoSeries(fg, crs='epsg:4326'))
+            figure = figure.to_crs(crs)
             figure.loc[[0], 'geometry'].plot(ax=ax, color='green', zorder=3)
             figure.loc[[1], 'geometry'].plot(ax=ax, color='none', edgecolor='red', zorder=2)
             figure.loc[[2], 'geometry'].plot(ax=ax, color='none', edgecolor='green', linewidth=1, zorder=2)
@@ -206,7 +210,7 @@ def get_holder_square(carre, search_dist, holder_gdf, ax=None):
     return holder_closest, holder_next_to
 
 
-def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist=0.15): # Paris: 2.207737, 48.921505 180000.csv, # paumé: 15790 140000.csv
+def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist=0.15, crs='epsg:4326'):  # Paris: 2.207737, 48.921505 180000.csv, # paumé: 15790 140000.csv
     """
     Display a map of French department with all file's squares and informations about the specific square selected.
     Legend: White square = square present in the file
@@ -223,28 +227,36 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     :param search_dist: maximum radius for search in degrees: (float) | 1 degree ~= 111km for lat, 73km for lon
     """
 
-    gdf_carre = carresfile_to_dataframe(file_path)
+    gdf_carre = carresfile_to_dataframe(file_path, crs=crs)
 
     if lon is not None and lat is not None:
+        p = Point(lon, lat)
+
         carre_to_show = gdf_carre.loc[gdf_carre.geometry.contains(Point(lon, lat).buffer(0.00000005)), 'geometry']  # Paris: 2.207737, 48.921505 180000.csv | paumé: 15790 140000.csv
 
     else:
         carre_to_show = gdf_carre.loc[[pos_in_file], 'geometry']
 
-    ax = gdf_carre.plot(color='none', edgecolor='k', linewidth=0.25, zorder=1)
-    carre_to_show.plot(ax=ax, color='blue', edgecolor='k', linewidth=0.25, zorder=2)
-
     holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
     geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
     holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
-
-    r = get_holder_square(carre_to_show.iloc[0], search_dist, holder_gdf, ax)
 
     dept = gpd.read_file('departements-contour/departements-20180101.shp')
     dept.crs = 'epsg:4326'
     selected_col = ['code_insee', 'geometry']
     dept = dept[selected_col]
-    dept.plot(ax=ax, color='White', edgecolor='k', linewidth=0.5, zorder=0)
+    dept = dept.loc[dept["code_insee"].isin(list(filter(lambda x: "97" not in x, dept['code_insee'])))]
+
+    dept = dept.to_crs(crs)
+    ax = dept.plot(color='White', edgecolor='k', linewidth=0.5, zorder=0)
+
+    r = get_holder_square(carre_to_show.iloc[0], search_dist, holder_gdf, crs, ax)
+
+    gdf_carre = gdf_carre.to_crs(crs)
+    gdf_carre.plot(ax=ax, color='none', edgecolor='k', linewidth=0.25, zorder=1)
+    carre_to_show = carre_to_show.to_crs(crs)
+    carre_to_show.plot(ax=ax, color='blue', edgecolor='k', linewidth=0.25, zorder=2)
+
 
     print('Nearest holder:', r[0])
     print("All near holders: ", r[1])
@@ -279,11 +291,14 @@ def add_holder_to_square(file_path, search_dist=0.15):
 
 # Start time exec
 start_time = time.time()
-# show_holder_around('tables/carres/carres1800000.csv')
-add_holder_to_square('tables/carres/carres1800000.csv')
+show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
+# show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395')
+# add_holder_to_square('tables/carres/carres1800000.csv')
+
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
 
+plt.show()
 
 # res = init_files()
 # print("Nb lignes support: ", len(res[0]))
