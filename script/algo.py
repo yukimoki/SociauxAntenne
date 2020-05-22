@@ -263,7 +263,7 @@ def add_holder_to_square(file_path, search_dist=0.15):
     gdf_carre['ToutSupProche'] = None
 
     i = 0
-    bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed)d]', max=gdf_carre['num'].size)
+    bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=gdf_carre['num'].size)
     for idx, geom in gdf_carre.iterrows():
         carre = geom[gdf_carre.geometry.name]
         r = get_holder_square(carre, search_dist, holder_gdf)
