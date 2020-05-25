@@ -271,29 +271,28 @@ def add_holder_to_square(file_path, search_dist=0.15):
     holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
 
     gdf_carre = carresfile_to_dataframe(file_path)
-    gdf_carre['SupPlusProche'] = None
-    gdf_carre['ToutSupProche'] = None
+    gdf_carre["'SupPlusProche'"] = None
+    gdf_carre["'ToutSupProche'"] = None
 
-    i = 0
     bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=gdf_carre["'num'"].size)
     for idx, geom in gdf_carre.iterrows():
-        carre = geom[gdf_carre.geometry.name]
-        r = get_holder_square(carre, search_dist, holder_gdf)
+            carre = geom[gdf_carre.geometry.name]
+            r = get_holder_square(carre, search_dist, holder_gdf)
 
-        gdf_carre.at[idx, 'SupPlusProche'] = "-".join(str(e) for e in r[0])
-        gdf_carre.at[idx, 'ToutSupProche'] = "-".join(str(e) for e in r[1])
-        bar.next()
+            gdf_carre.at[idx, 'SupPlusProche'] = "-".join(str(e) for e in r[0])
+            gdf_carre.at[idx, 'ToutSupProche'] = "-".join(str(e) for e in r[1])
+            bar.next()
     bar.finish()
 
     print("Writing file...")
-    gdf_carre.to_csv('tables/carresSup/carres1800000.csv', sep=';', columns=['num', 'IDsurface', 'IDcrs', 'x1', 'y1', 'x2', 'y2', 'x3', 'y3', 'x4', 'y4', 'SupPlusProche', 'ToutSupProche'])
+    gdf_carre.to_csv(file_path[:-4]+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", 'SupPlusProche', 'ToutSupProche'])
 
 
 # Start time exec
 start_time = time.time()
 # show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
 # show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395')
-for i in range(0, 2200001, 100000):
+for i in range(0, 2, 100000):
     print("Traitement de carres"+str(i)+".csv")
     add_holder_to_square('tables/carrePlusDe10/carres'+str(i)+'.csv')
 
