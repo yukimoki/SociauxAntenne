@@ -291,9 +291,11 @@ def add_holder_to_square(file_path, search_dist=0.15):
 
 # Start time exec
 start_time = time.time()
-show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
+# show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
 # show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395')
-# add_holder_to_square('tables/carres/carres1800000.csv')
+for i in range(0, 2200001, 100000):
+    print("Traitement de carres"+str(i)+".csv")
+    add_holder_to_square('tables/carrePlusDe10/carres'+str(i)+'.csv')
 
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
