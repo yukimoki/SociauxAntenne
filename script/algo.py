@@ -1,5 +1,6 @@
 # -*-coding: UTF-8 -*
 import csv
+import sys
 from typing import List, Any
 
 import geopandas as gpd
@@ -264,7 +265,7 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     plt.show()
 
 
-def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
+def add_holder_to_square(file_path, start=0, end=None, search_dist=0.15):
 
     print("start")
     holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
@@ -283,11 +284,8 @@ def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
 
     bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=end-start)
     for idx, geom in gdf_wanted.iterrows():
-        print(geom)
         if idx <= end:
-            print(idx)
             carre = geom[gdf_carre.geometry.name]
-            print(carre)
             r = get_holder_square(carre, search_dist, holder_gdf)
 
             gdf_carre.at[idx, 'SupPlusProche'] = "-".join(str(e) for e in r[0])
@@ -298,14 +296,23 @@ def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
     bar.finish()
 
     print("Writing file...")
-    gdf_carre.to_csv(file_path[:-4]+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", 'SupPlusProche', 'ToutSupProche'])
+    gdf_carre.to_csv(file_path[:-4]+"["+str(start)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", 'SupPlusProche', 'ToutSupProche'])
 
 
 # Start time exec
 start_time = time.time()
 # show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
-# show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395')
-add_holder_to_square('tables/carrePlusDe10/carresALL.csv', start=895760)
+# show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395') 895760
+argc = len(sys.argv)
+if argc < 2:
+    print("Use intern param")
+    add_holder_to_square('tables/carrePlusDe10/carresALL.csv', end=10)
+elif argc == 2:
+    add_holder_to_square(sys.argv[1])
+elif argc == 3:
+    add_holder_to_square(sys.argv[1], start=int(sys.argv[2]))
+else:
+    add_holder_to_square(sys.argv[1], start=int(sys.argv[2]), end=int(sys.argv[3]))
 
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
