@@ -2,6 +2,7 @@
 import asyncio
 import csv
 import math
+import os
 import sys
 import time
 
@@ -245,7 +246,7 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     plt.show()
 
 
-def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
+def add_holder_to_square(file_path, holder_gdf, gdf_carre, start=1, end=None, search_dist=0.15):
     """
     Create a file based on square file and append 3 columns with:
         - SupPlusProche: id of the nearest holder (int)
@@ -258,21 +259,13 @@ def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
     """
     # Line number to index
     start -= 1
-    print("start")
-    lock = asyncio.Lock()
-    async with lock:
-        holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
-        geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
-        holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
 
-        gdf_carre = carresfile_to_dataframe(file_path)
-        gdf_carre["'SupPlusProche'"] = None
-        gdf_carre["'DistPlusProche'"] = None
-        gdf_carre["'ToutSupProche'"] = None
+    gdf_carre["'SupPlusProche'"] = None
+    gdf_carre["'DistPlusProche'"] = None
+    gdf_carre["'ToutSupProche'"] = None
 
     if end is None:
         end = gdf_carre["'num'"].size
-    print("init done")
 
     gdf_wanted = gdf_carre.iloc[start: end]
 
@@ -293,19 +286,54 @@ def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
 
 # Start time exec
 start_time = time.time()
+print("init")
+holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
+geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
+holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
+
+gdf_carre = carresfile_to_dataframe(sys.argv[1])
+
+print("init done")
+
+return_fork = -1
+step = round(int(sys.argv[3])/int(sys.argv[4]))
+start = int(sys.argv[2])
+end = start + step - 1
+for i in range(int(sys.argv[4])+1):
+
+    if return_fork == 0:
+        print("start add holder")
+        print(start, end, step)
+        add_holder_to_square(sys.argv[1], holder_gdf, gdf_carre, start, end)
+        print("Temps d execution processus fils: %s secondes ---" % (time.time() - start_time))
+        exit(0)
+    else:
+        print("new process", i)
+        return_fork = os.fork()
+        if i > 0:
+            start += step
+            end = start + step - 1
+            if end > int(sys.argv[3]):
+                end = int(sys.argv[3])
+
+for i in range(int(sys.argv[4])):
+    print(os.wait())
+
+print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
+
+
 # show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
 # show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395') 895760
-argc = len(sys.argv)
-if argc < 2:
-    print("Use intern param")
-    add_holder_to_square('tables/carrePlusDe10/carresALL.csv', end=5)
-elif argc == 2:
-    add_holder_to_square(sys.argv[1])
-elif argc == 3:
-    add_holder_to_square(sys.argv[1], start=int(sys.argv[2]))
-else:
-    add_holder_to_square(sys.argv[1], start=int(sys.argv[2]), end=int(sys.argv[3]))
+# argc = len(sys.argv)
+# if argc < 2:
+#     print("Use intern param")
+#     add_holder_to_square('tables/carrePlusDe10/carresALL.csv', end=5)
+# elif argc == 2:
+#     add_holder_to_square(sys.argv[1])
+# elif argc == 3:
+#     add_holder_to_square(sys.argv[1], start=int(sys.argv[2]))
+# else:
+#     add_holder_to_square(sys.argv[1], start=int(sys.argv[2]), end=int(sys.argv[3]))
 
 # Show execution time
-print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
 
