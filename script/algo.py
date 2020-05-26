@@ -281,22 +281,20 @@ def add_holder_to_square(file_path, start=0, end=None, search_dist=0.15):
     print("init done")
 
     gdf_wanted = gdf_carre.iloc[start: end]
+    gdf_wanted.drop
 
     bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=end-start)
     for idx, geom in gdf_wanted.iterrows():
-        if idx <= end:
-            carre = geom[gdf_carre.geometry.name]
-            r = get_holder_square(carre, search_dist, holder_gdf)
+        carre = geom[gdf_wanted.geometry.name]
+        r = get_holder_square(carre, search_dist, holder_gdf)
 
-            gdf_carre.at[idx, 'SupPlusProche'] = "-".join(str(e) for e in r[0])
-            gdf_carre.at[idx, 'ToutSupProche'] = "-".join(str(e) for e in r[1])
-            bar.next()
-        else:
-            continue
+        gdf_wanted.at[idx, "'SupPlusProche'"] = "'"+"-".join(str(e) for e in r[0])+"'"
+        gdf_wanted.at[idx, "'ToutSupProche'"] = "'"+"-".join(str(e) for e in r[1])+"'"
+        bar.next()
     bar.finish()
 
     print("Writing file...")
-    gdf_carre.to_csv(file_path[:-4]+"["+str(start)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", 'SupPlusProche', 'ToutSupProche'])
+    gdf_wanted.to_csv(file_path[:-4]+"["+str(start)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", "'SupPlusProche'", "'ToutSupProche'"], index=False)
 
 
 # Start time exec
