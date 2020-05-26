@@ -264,8 +264,9 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     plt.show()
 
 
-def add_holder_to_square(file_path, search_dist=0.15):
+def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
 
+    print("start")
     holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
     geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
     holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
@@ -274,14 +275,26 @@ def add_holder_to_square(file_path, search_dist=0.15):
     gdf_carre["'SupPlusProche'"] = None
     gdf_carre["'ToutSupProche'"] = None
 
-    bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=gdf_carre["'num'"].size)
-    for idx, geom in gdf_carre.iterrows():
+    if end is None:
+        end = gdf_carre["'num'"].size
+    print("init done")
+
+    gdf_wanted = gdf_carre.iloc[start: end]
+
+    bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=end-start)
+    for idx, geom in gdf_wanted.iterrows():
+        print(geom)
+        if idx <= end:
+            print(idx)
             carre = geom[gdf_carre.geometry.name]
+            print(carre)
             r = get_holder_square(carre, search_dist, holder_gdf)
 
             gdf_carre.at[idx, 'SupPlusProche'] = "-".join(str(e) for e in r[0])
             gdf_carre.at[idx, 'ToutSupProche'] = "-".join(str(e) for e in r[1])
             bar.next()
+        else:
+            continue
     bar.finish()
 
     print("Writing file...")
@@ -292,9 +305,7 @@ def add_holder_to_square(file_path, search_dist=0.15):
 start_time = time.time()
 # show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
 # show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395')
-for i in range(0, 2, 100000):
-    print("Traitement de carres"+str(i)+".csv")
-    add_holder_to_square('tables/carrePlusDe10/carres'+str(i)+'.csv')
+add_holder_to_square('tables/carrePlusDe10/carresALL.csv', start=895760)
 
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
