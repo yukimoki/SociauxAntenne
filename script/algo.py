@@ -2,68 +2,32 @@
 import csv
 import math
 import sys
-from typing import List, Any
-from math import sqrt, atan2
-import geopandas as gpd
-import pandas as pd
-import pyproj
-from descartes import PolygonPatch
-from geopandas import GeoSeries, GeoDataFrame
-import matplotlib.pyplot as plt
-import rtree
-from pyproj import Proj
-from shapely.geometry import Polygon, Point, LineString
-import re
 import time
+
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import pandas as pd
+from geopandas import GeoSeries, GeoDataFrame
 from progress.bar import Bar
-
-def init_files():
-    """
-    Init file content in dictionary
-    (obsolete)
-    :return:
-    """
-    with open('tables/finalDB/SUPPORT.csv', 'r') as supports_file:
-        reader_csv = csv.reader(supports_file, delimiter=';')
-        supports = {}
-        next(reader_csv)
-        for row in reader_csv:
-            supports[row[0]] = [row[1], row[2], row[5]]
-
-    with open('tables/depart_limitrophe.txt', 'r') as departs_file:
-        reader_csv = csv.reader(departs_file, delimiter=':')
-        departs = {}
-        for row in reader_csv:
-            departs[row[0]] = row[1].split(',')
-
-    for num_name in range(0, 2200000, 100000):
-        with open('tables/carres/carres' + str(num_name) + '.csv', 'r') as carres_file:
-            reader_csv = csv.reader(carres_file, delimiter=';')
-            carres = {}
-            next(reader_csv)
-            for row in reader_csv:
-                carres[row[0]] = (row[3], row[4])
-
-    return supports, departs, carres
+from shapely.geometry import Polygon, Point, LineString
 
 
 def departs_shape():
     """
     Link items of carresXXXX.csv with their postal code
-    (obsolete)
-    :return:
+    (only global square visualisation)
     """
     dept = gpd.read_file('departements-contour/departements-20180101.shp')
     dept.crs = 'epsg:4326'
 
     polys = []
-    # un zero de plus pour moins de données
-    for num_name in range(1800000, 1800500, 1000000):
-        print("Extract square form carres", num_name, ".csv")
-        with open('tables/carres/carres' + str(num_name) + '.csv') as carre_file:
-            csv_reader = csv.reader(carre_file, delimiter=';')
-            next(csv_reader)
-            for row in csv_reader:
+    print("Extract square form carresALL.csv")
+    with open('tables/carrePlusDe10/carresALL.csv') as carre_file:
+        csv_reader = csv.reader(carre_file, delimiter=';')
+        next(csv_reader)
+        i = 0
+        for row in csv_reader:
+            if i < 100000:
                 tmp_tab = []
                 for i in range(len(row)):
                     if i > 2:
@@ -95,7 +59,6 @@ def departs_shape():
     print("Ploted!")
     print("Temps d execution : %s secondes ---" % (time.time() - start_time))
     plt.show()
-    return gdf_carre
 
 
 def carresfile_to_dataframe(file_path, crs='epsg:4326'):
@@ -129,6 +92,7 @@ def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
     """
     Find the nearest holder from a specific point,
     then find all the holder present in a field nearly 300 meters further than the nearest support
+    :param crs: chose a specific crs (not recommended)
     :param src_point: point of reference to find near holders : (Point(lat,lon))
     :param search_dist: maximum radius for search in degrees : (float) | 1 degree ~= 111km for lat, 73km for lon
     :param holder_gdf: geodataframe containing holders with their location (GeoDataFrame) (pos as Point in 'geometry')
@@ -140,9 +104,10 @@ def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
     all_holder = holder_gdf.loc[holder_gdf.intersects(src_point.buffer(search_dist))]
     unary = all_holder.unary_union
     closest_holder_point = None
-    distance = search_dist + 99999
+    distance = 9999999
+    dist_rad = search_dist + 99999
 
-    R = 6372800  # Earth radius in meters
+    earth_rad = 6372800  # Earth radius in meters
     for holder_point in enumerate(unary):
         # d = holder_point[1].distance(src_point)
         phi1, phi2 = math.radians(holder_point[1].y), math.radians(src_point.y)
@@ -151,7 +116,7 @@ def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
 
         a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
 
-        d = 2 * R * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        d = 2 * earth_rad * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         if d < distance:
             distance = d
@@ -171,6 +136,7 @@ def get_holder_square(carre, search_dist, holder_gdf, crs='epsg:4326', ax=None):
     """
     Take 4 points in "carre" (square) based on his diagonals and call get_holder_point() for each of them
     Stock the ids of nearest holders in a list of 4 and all ids of holders considered as near ('distance to nearest' + ~300meters)
+    :param crs: chose a specific crs (not recommended) : (str)
     :param carre: square as reference to find near holders : (POLYGON, simple shape and not DataFrame or Series)
     :param search_dist: maximum radius for search in degrees: (float) | 1 degree ~= 111km for lat, 73km for lon
     :param holder_gdf: geodataframe containing holders with their location (GeoDataFrame) (pos as Point in 'geometry')
@@ -232,10 +198,11 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
             Blue square = square selected
             Green point = 4 source points of the square from which are find near holder
             Red point = nearest holder of source points (so [1, 4] red point displayed)
-            Red circle = field in which are the other near holder (radius = distance to the nearset + ~300meters)
+            Red circle = field in which are the other near holder (radius = distance to the nearest + ~300meters)
             Orange point = other holder in the red circles
             Green circle = maximum distance from which are selected the holder to the distance comparison
-    :param file_path: path of the square file : (String)
+    :param crs: chose a specific crs (not recommended) : (string)
+    :param file_path: path of the square file : (string)
     :param pos_in_file: line position of the selected square : (int)
     :param lon: longitude of a point within the square in degrees: (float)
     :param lat: latitude of a point within the square in degrees: (float)
@@ -271,15 +238,25 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     carre_to_show = carre_to_show.to_crs(crs)
     carre_to_show.plot(ax=ax, color='blue', edgecolor='k', linewidth=0.25, zorder=2)
 
-
     print('Nearest holder:', r[0])
     print("All near holders: ", r[1])
 
     plt.show()
 
 
-def add_holder_to_square(file_path, start=0, end=None, search_dist=0.15):
-
+def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
+    """
+    Create a file based on square file and append 3 columns with:
+        - SupPlusProche: id of the nearest holder (int)
+        - DistPlusProche: distance to the nearest holder (float, 2 decimals)
+        - ToutSupProche: all holder within a radius of nearest dist + ~300 meters (for 4 point of square subdivision)
+    :param file_path: path of the square's file: (string)
+    :param start: first line number to treat: (int) >= 1
+    :param end: last line number to treat: (int) <= total of line
+    :param search_dist: maximum radius for search in degrees: (float) | 1 degree ~= 111km for lat, 73km for lon
+    """
+    # Line number to index
+    start -= 1
     print("start")
     holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
     geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
@@ -308,7 +285,7 @@ def add_holder_to_square(file_path, start=0, end=None, search_dist=0.15):
     bar.finish()
 
     print("Writing file...")
-    gdf_wanted.to_csv(file_path[:-4]+"["+str(start)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", "'SupPlusProche'", "'DistPlusProche'", "'ToutSupProche'"], index=False)
+    gdf_wanted.to_csv(file_path[:-4]+"["+str(start+1)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", "'SupPlusProche'", "'DistPlusProche'", "'ToutSupProche'"], index=False)
 
 
 # Start time exec
@@ -329,7 +306,3 @@ else:
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
 
-# res = init_files()
-# print("Nb lignes support: ", len(res[0]))
-# print("Nb lignes départements: ", len(res[1]))
-# print("Nb lignes carres: ", len(res[2]))
