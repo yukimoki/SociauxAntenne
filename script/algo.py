@@ -296,7 +296,7 @@ gdf_carre = carresfile_to_dataframe(sys.argv[1])
 print("init done")
 
 return_fork = -1
-step = round(int(sys.argv[3])/int(sys.argv[4]))
+step = round((int(sys.argv[3])-int(sys.argv[2]))/int(sys.argv[4]))
 start = int(sys.argv[2])
 end = start + step - 1
 for i in range(int(sys.argv[4])+1):
