@@ -1,14 +1,17 @@
 # -*-coding: UTF-8 -*
 import csv
+import math
 import sys
 from typing import List, Any
-
+from math import sqrt, atan2
 import geopandas as gpd
 import pandas as pd
+import pyproj
 from descartes import PolygonPatch
 from geopandas import GeoSeries, GeoDataFrame
 import matplotlib.pyplot as plt
 import rtree
+from pyproj import Proj
 from shapely.geometry import Polygon, Point, LineString
 import re
 import time
@@ -139,17 +142,26 @@ def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
     closest_holder_point = None
     distance = search_dist + 99999
 
+    R = 6372800  # Earth radius in meters
     for holder_point in enumerate(unary):
-        d = holder_point[1].distance(src_point)
+        # d = holder_point[1].distance(src_point)
+        phi1, phi2 = math.radians(holder_point[1].y), math.radians(src_point.y)
+        dphi = math.radians(src_point.y - holder_point[1].y)
+        dlambda = math.radians(src_point.x - holder_point[1].x)
+
+        a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+
+        d = 2 * R * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
         if d < distance:
             distance = d
+            dist_rad = holder_point[1].distance(src_point)
             closest_holder_point = holder_point
 
     closest_holder = holder_gdf.loc[holder_gdf.intersects(closest_holder_point[1].buffer(0.00000005))]
     closest_holder = closest_holder.to_crs(crs)
 
-    holder_near = all_holder.loc[all_holder.intersects(src_point.buffer(distance+0.003))]
+    holder_near = all_holder.loc[all_holder.intersects(src_point.buffer(dist_rad+0.003))]
     holder_near = holder_near.to_crs(crs)
 
     return closest_holder, holder_near, distance
@@ -188,7 +200,9 @@ def get_holder_square(carre, search_dist, holder_gdf, crs='epsg:4326', ax=None):
         #         src_pt = Point(x, y)
 
         r = get_holder_point(src_pt, search_dist, holder_gdf, crs)
-        holder_closest.append(r[0]['ID_SUP'].iloc[0])
+        distance = r[2]
+        if len(holder_closest) == 0 or distance < holder_closest[1]:
+            holder_closest = [r[0]['ID_SUP'].iloc[0], distance]
 
         for h in r[1]['ID_SUP']:
             holder_next_to.add(h)
@@ -232,8 +246,7 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
 
     if lon is not None and lat is not None:
         p = Point(lon, lat)
-
-        carre_to_show = gdf_carre.loc[gdf_carre.geometry.contains(Point(lon, lat).buffer(0.00000005)), 'geometry']  # Paris: 2.207737, 48.921505 180000.csv | paumé: 15790 140000.csv
+        carre_to_show = gdf_carre.loc[gdf_carre.geometry.contains(p.buffer(0.00000005)), 'geometry']  # Paris: 2.207737, 48.921505 180000.csv | paumé: 15790 140000.csv
 
     else:
         carre_to_show = gdf_carre.loc[[pos_in_file], 'geometry']
@@ -274,6 +287,7 @@ def add_holder_to_square(file_path, start=0, end=None, search_dist=0.15):
 
     gdf_carre = carresfile_to_dataframe(file_path)
     gdf_carre["'SupPlusProche'"] = None
+    gdf_carre["'DistPlusProche'"] = None
     gdf_carre["'ToutSupProche'"] = None
 
     if end is None:
@@ -281,20 +295,20 @@ def add_holder_to_square(file_path, start=0, end=None, search_dist=0.15):
     print("init done")
 
     gdf_wanted = gdf_carre.iloc[start: end]
-    gdf_wanted.drop
 
     bar = Bar('Adding holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=end-start)
     for idx, geom in gdf_wanted.iterrows():
         carre = geom[gdf_wanted.geometry.name]
         r = get_holder_square(carre, search_dist, holder_gdf)
 
-        gdf_wanted.at[idx, "'SupPlusProche'"] = "'"+"-".join(str(e) for e in r[0])+"'"
+        gdf_wanted.at[idx, "'SupPlusProche'"] = "'"+str(r[0][0])+"'"
+        gdf_wanted.at[idx, "'DistPlusProche'"] = "'"+str(round(r[0][1], 2))+"'"
         gdf_wanted.at[idx, "'ToutSupProche'"] = "'"+"-".join(str(e) for e in r[1])+"'"
         bar.next()
     bar.finish()
 
     print("Writing file...")
-    gdf_wanted.to_csv(file_path[:-4]+"["+str(start)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", "'SupPlusProche'", "'ToutSupProche'"], index=False)
+    gdf_wanted.to_csv(file_path[:-4]+"["+str(start)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", "'SupPlusProche'", "'DistPlusProche'", "'ToutSupProche'"], index=False)
 
 
 # Start time exec
@@ -304,7 +318,7 @@ start_time = time.time()
 argc = len(sys.argv)
 if argc < 2:
     print("Use intern param")
-    add_holder_to_square('tables/carrePlusDe10/carresALL.csv', end=10)
+    add_holder_to_square('tables/carrePlusDe10/carresALL.csv', end=5)
 elif argc == 2:
     add_holder_to_square(sys.argv[1])
 elif argc == 3:
@@ -314,8 +328,6 @@ else:
 
 # Show execution time
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
-
-plt.show()
 
 # res = init_files()
 # print("Nb lignes support: ", len(res[0]))
