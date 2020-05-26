@@ -1,4 +1,5 @@
 # -*-coding: UTF-8 -*
+import asyncio
 import csv
 import math
 import sys
@@ -258,14 +259,16 @@ def add_holder_to_square(file_path, start=1, end=None, search_dist=0.15):
     # Line number to index
     start -= 1
     print("start")
-    holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
-    geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
-    holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
+    lock = asyncio.Lock()
+    async with lock:
+        holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
+        geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
+        holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
 
-    gdf_carre = carresfile_to_dataframe(file_path)
-    gdf_carre["'SupPlusProche'"] = None
-    gdf_carre["'DistPlusProche'"] = None
-    gdf_carre["'ToutSupProche'"] = None
+        gdf_carre = carresfile_to_dataframe(file_path)
+        gdf_carre["'SupPlusProche'"] = None
+        gdf_carre["'DistPlusProche'"] = None
+        gdf_carre["'ToutSupProche'"] = None
 
     if end is None:
         end = gdf_carre["'num'"].size
