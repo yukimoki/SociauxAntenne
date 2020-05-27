@@ -168,9 +168,8 @@ def get_holder_square(carre, search_dist, holder_gdf, crs='epsg:4326', ax=None):
         #         src_pt = Point(x, y)
 
         r = get_holder_point(src_pt, search_dist, holder_gdf, crs)
-        distance = r[2]
-        if len(holder_closest) == 0 or distance < holder_closest[1]:
-            holder_closest = [r[0]['ID_SUP'].iloc[0], distance]
+
+        holder_closest.append((r[0]['ID_SUP'].iloc[0], r[2]))
 
         for h in r[1]['ID_SUP']:
             holder_next_to.add(h)
@@ -259,13 +258,14 @@ def add_holder_to_square(file_path, holder_gdf, gdf_carre, start=1, end=None, se
     """
     # Line number to index
     start -= 1
-
-    gdf_carre["'SupPlusProche'"] = None
-    gdf_carre["'DistPlusProche'"] = None
-    gdf_carre["'ToutSupProche'"] = None
-
     if end is None:
         end = gdf_carre["'num'"].size
+
+    gdf_carre["'SupProchePt1'"] = None
+    gdf_carre["'SupProchePt2'"] = None
+    gdf_carre["'SupProchePt3'"] = None
+    gdf_carre["'SupProchePt4'"] = None
+    gdf_carre["'IdAllSupProche'"] = None
 
     gdf_wanted = gdf_carre.iloc[start: end]
 
@@ -274,14 +274,17 @@ def add_holder_to_square(file_path, holder_gdf, gdf_carre, start=1, end=None, se
         carre = geom[gdf_wanted.geometry.name]
         r = get_holder_square(carre, search_dist, holder_gdf)
 
-        gdf_wanted.at[idx, "'SupPlusProche'"] = "'"+str(r[0][0])+"'"
-        gdf_wanted.at[idx, "'DistPlusProche'"] = "'"+str(round(r[0][1], 2))+"'"
-        gdf_wanted.at[idx, "'ToutSupProche'"] = "'"+"-".join(str(e) for e in r[1])+"'"
+        gdf_wanted.at[idx, "'SupProchePt1'"] = "'"+str(r[0][0][0])+"-"+str(round(r[0][0][1]))+"'"
+        gdf_wanted.at[idx, "'SupProchePt2'"] = "'"+str(r[0][1][0])+"-"+str(round(r[0][1][1]))+"'"
+        gdf_wanted.at[idx, "'SupProchePt3'"] = "'"+str(r[0][2][0])+"-"+str(round(r[0][2][1]))+"'"
+        gdf_wanted.at[idx, "'SupProchePt4'"] = "'"+str(r[0][3][0])+"-"+str(round(r[0][3][1]))+"'"
+
+        gdf_wanted.at[idx, "'IdAllSupProche'"] = "'"+"-".join(str(e) for e in r[1])+"'"
         bar.next()
     bar.finish()
 
     print("Writing file...")
-    gdf_wanted.to_csv(file_path[:-4]+"["+str(start+1)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'", "'SupPlusProche'", "'DistPlusProche'", "'ToutSupProche'"], index=False)
+    gdf_wanted.to_csv(file_path[:-4]+"["+str(start+1)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'","'SupProchePt1'", "'SupProchePt2'", "'SupProchePt3'", "'SupProchePt4'", "'IdAllSupProche'"], index=False)
 
 
 # Start time exec
@@ -316,7 +319,7 @@ for i in range(int(sys.argv[4])+1):
             if end > int(sys.argv[3]):
                 end = int(sys.argv[3])
 
-for i in range(int(sys.argv[4])):
+for i in range(int(sys.argv[4])+1):
     print(os.wait())
 
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
