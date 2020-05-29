@@ -1,5 +1,4 @@
 # -*-coding: UTF-8 -*
-import asyncio
 import csv
 import math
 import os
@@ -319,7 +318,7 @@ for i in range(int(sys.argv[4])+1):
             if end > int(sys.argv[3]):
                 end = int(sys.argv[3])
 
-for i in range(int(sys.argv[4])+1):
+for i in range(int(sys.argv[4])):
     print(os.wait())
 
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
