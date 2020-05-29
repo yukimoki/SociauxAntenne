@@ -1,9 +1,13 @@
 import csv
 import pandas as pd
 
+# Bash pour concaténer les fichiers
+# mv carresALL\[1-* finalcarres.csv
+# tail -n +2 -q carresALL\[*  >> finalcarres.csv
+
 with open('tables/carrePlusDe10/finalcarres.csv', 'r') as in_file:
     file_reader = csv.reader(in_file, delimiter=';')
-    with open('tables/carrePlusDe10/CarresDistSupProche.csv', 'w') as out_file:
+    with open('tables/finalDB/CarresDistSupProche.csv', 'w') as out_file:
         file_writer = csv.writer(out_file)
         new_header = ["num", "IDsurface", "IDcrs", "x1", "y1", "x2", "y2", "x3", "y3", "x4", "y4", "IdSupProchePt1", "DistSupProchePt1", "IdSupProchePt2", "DistSupProchePt2", "IdSupProchePt3", "DistSupProchePt3", "IdSupProchePt4", "DistSupProchePt4", "IdAllSupProche"]
         file_writer.writerow(new_header)
