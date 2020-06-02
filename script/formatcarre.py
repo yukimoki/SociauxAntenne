@@ -8,7 +8,7 @@ import pandas as pd
 with open('tables/carrePlusDe10/finalcarres.csv', 'r') as in_file:
     file_reader = csv.reader(in_file, delimiter=';')
     with open('tables/finalDB/CarresDistSupProche.csv', 'w') as out_file:
-        file_writer = csv.writer(out_file)
+        file_writer = csv.writer(out_file, delimiter=";")
         new_header = ["num", "IDsurface", "IDcrs", "x1", "y1", "x2", "y2", "x3", "y3", "x4", "y4", "IdSupProchePt1", "DistSupProchePt1", "IdSupProchePt2", "DistSupProchePt2", "IdSupProchePt3", "DistSupProchePt3", "IdSupProchePt4", "DistSupProchePt4", "IdAllSupProche"]
         file_writer.writerow(new_header)
         next(file_reader)
