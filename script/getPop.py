@@ -10,11 +10,11 @@ r = requests.get(url = URL )
 # extracting data in json format 
 data = r.json() 
 header = ["code_insee","nom","population"]
-file_carre = open('tables/getPop.csv', 'w')
+file_carre = open('tables/getPopCodePostal.csv', 'w')
 csv_carre_writer = csv.writer(file_carre, delimiter=';')
 csv_carre_writer.writerow(header)
 for item in data:
     if("population" in item):
-        csv_carre_writer.writerow([item["code"], item["nom"], item["population"]])
+        csv_carre_writer.writerow([str(item["codesPostaux"]).replace("['","").replace("']","").replace("'","").replace(" ",""), item["nom"], item["population"]])
 
 
