@@ -33,27 +33,49 @@ with open('tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File:
     next(file_reader)
     for row in file_reader:
         if(int(row[2])>140000):
-            listSup140M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listSup140M.add(i)
         elif(int(row[2])>100000):
-            listInf140M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf140M.add(i)
         elif(int(row[2])>80000):
-            listInf100M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf100M.add(i)
         elif(int(row[2])>60000):
-            listInf80M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf80M.add(i)
         elif(int(row[2])>40000):
-            listInf60M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf60M.add(i)
         elif(int(row[2])>20000):
-            listInf40M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf40M.add(i)
         elif(int(row[2])>10000):
-            listInf20M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf20M.add(i)
         elif(int(row[2])>5000):
-            listInf10M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf10M.add(i)
         elif(int(row[2])>1000):
-            listInf5M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf5M.add(i)
         elif(int(row[2])>500):
-            listInf1M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf1M.add(i)
         else:
-            listInf05M.add(row[0])
+            temp = row[0].split(",")
+            for i in temp:
+                listInf05M.add(i)
 
 
 with open('tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
@@ -86,4 +108,18 @@ with open('tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup:
             print(row)
 
 print("ok")
-print(itterator)
+x=0
+for j in itterator:
+    x +=j
+print(x)
+
+
+data = {"range":["0 to 0.5", "0.5 to 1", "1M to 5", "5 to 10", "10 to 20", "20 to 40", "40 to 60", "60 to 80", "80 to 100", "100 to 140", "plus de 140"],
+        "values":itterator
+        };
+
+dataFrame = pd.DataFrame(data=data);
+
+dataFrame.plot.bar(x="range", y="values", rot=25, title="Nombre de support en fonction de la population de la commune(en millier d'hab)");
+print("okau")
+plot.savefig('tables/statpop.png')

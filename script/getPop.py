@@ -15,6 +15,6 @@ csv_carre_writer = csv.writer(file_carre, delimiter=';')
 csv_carre_writer.writerow(header)
 for item in data:
     if("population" in item):
-        csv_carre_writer.writerow([str(item["codesPostaux"]).replace("['","").replace("']",""), item["nom"], item["population"]])
+        csv_carre_writer.writerow([str(item["codesPostaux"]).replace("['","").replace("']","").replace("'","").replace(" ",""), item["nom"], item["population"]])
 
 
