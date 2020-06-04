@@ -9,7 +9,7 @@ cAll = 'data/carresALL[essai]avecSup.csv'
 cStats = 'data/carres-stats-avec-nb-antennes'
 with open(cAll) as carre_file:
     cAll = pd.read_csv(carre_file, sep=';', quotechar="'")
-    bar = IncrementalBar('Countdown', max = len(cAll))
+    bar = IncrementalBar('Chargement', max = len(cAll))
 with open(cStats) as carre_file:
     cStats = pd.read_csv(carre_file, sep='\s+')
     header = list(cStats.columns.values)
@@ -28,7 +28,7 @@ def plot_chart(detail=10, stat='poptot', type='LTE'):
     for index, row in cAll.iterrows():
         bar.next()
         for i in range (1,4): # 4 points du carré
-            dist = int(row['SupProchePt'+str(1)].split('-')[1]) # distance de l'antenne au point
+            dist = int(row['SupProchePt'+str(i)].split('-')[1]) # distance de l'antenne au point
             pop = cStats.loc[cStats['LAEA']==row['IDcrs']].values[0][stat_index] / 4 #values[0][2] => poptot
             data[math.floor(dist//interval)][1]+=pop
     bar.finish()
