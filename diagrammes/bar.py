@@ -5,8 +5,8 @@ import math
 import time
 from progress.bar import IncrementalBar
 
-cAll = 'carresALL[essai]avecSup.csv'
-cStats = 'carres-stats-avec-nb-antennes'
+cAll = 'data/carresALL[essai]avecSup.csv'
+cStats = 'data/carres-stats-avec-nb-antennes'
 with open(cAll) as carre_file:
     cAll = pd.read_csv(carre_file, sep=';', quotechar="'")
     bar = IncrementalBar('Countdown', max = len(cAll))
@@ -25,7 +25,6 @@ def plot_chart(detail=10, stat='poptot', type='LTE'):
     
     for i in range (detail):
         data.append([str(math.floor(i*interval))+' à '+str(math.floor((i+1)*interval-1)), 0])
-    print(data)
     for index, row in cAll.iterrows():
         bar.next()
         for i in range (1,4): # 4 points du carré
@@ -36,10 +35,11 @@ def plot_chart(detail=10, stat='poptot', type='LTE'):
     df = pd.DataFrame(data,columns=['pop','support'],dtype=float)
     print(df)
     df.plot.bar(x="pop", y="support", rot=25, title="Distances des supports les plus proches aux carrés de population")
-    plot.show()
+    plot.savefig('statpop.png')
+    #plot.show()
 
 plot_chart()
 
-plot.savefig('statpop.png')
+
 
 # distribution: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.hist.html
