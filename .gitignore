@@ -6,6 +6,7 @@ finalDB/
 data/
 # IDE
 .idea/
+.run/
 
 #Python
 build/
