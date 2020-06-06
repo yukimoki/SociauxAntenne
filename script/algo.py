@@ -89,7 +89,7 @@ def carresfile_to_dataframe(file_path, crs='epsg:4326'):
     return gdf_carre
 
 
-def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
+def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326', ax=None):
     """
     Find the nearest holder from a specific point,
     then find all the holder present in a field nearly 300 meters further than the nearest support
@@ -97,6 +97,7 @@ def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
     :param src_point: point of reference to find near holders : (Point(lat,lon))
     :param search_dist: maximum radius for search in degrees : (float) | 1 degree ~= 111km for lat, 73km for lon
     :param holder_gdf: geodataframe containing holders with their location (GeoDataFrame) (pos as Point in 'geometry')
+    :param ax: (optional) reference to the first plot for visualisation, None = no visualisation
     :return: closest_holder : (GeoDataFrame with only 1 line),
              holder_near : (GeoDataFrame),
              distance from the source point to the nearest holder : (degrees)
@@ -129,6 +130,21 @@ def get_holder_point(src_point, search_dist, holder_gdf, crs='epsg:4326'):
 
     holder_near = all_holder.loc[all_holder.intersects(src_point.buffer(dist_rad+0.003))]
     holder_near = holder_near.to_crs(crs)
+
+    # ==================|| Visual ||======================================================== #
+    if ax is not None:
+        closest_holder.plot(ax=ax, color='red', zorder=5)
+        holder_near.plot(ax=ax, color="orange", zorder=4)
+        # interior = src_pt.buffer(r[2]).exterior.coords[::-1]
+        ring_sup = Polygon(src_point.buffer(dist_rad + 0.003).exterior)  # , [interior]
+        perimeter_max = src_point.buffer(search_dist)
+        fg = GeoSeries([src_point, ring_sup, perimeter_max], crs='epsg:4326')
+        figure = gpd.GeoDataFrame(geometry=gpd.GeoSeries(fg, crs='epsg:4326'))
+        figure = figure.to_crs(crs)
+        figure.loc[[0], 'geometry'].plot(ax=ax, color='green', zorder=3)
+        figure.loc[[1], 'geometry'].plot(ax=ax, color='none', edgecolor='red', zorder=2)
+        figure.loc[[2], 'geometry'].plot(ax=ax, color='none', edgecolor='green', linewidth=1, zorder=2)
+    # ======================================================================================= #
 
     return closest_holder, holder_near, distance
 
@@ -166,32 +182,17 @@ def get_holder_square(carre, search_dist, holder_gdf, crs='epsg:4326', ax=None):
         #         y = perimeter.interpolate(-j/16, normalized=True).y
         #         src_pt = Point(x, y)
 
-        r = get_holder_point(src_pt, search_dist, holder_gdf, crs)
+        r = get_holder_point(src_pt, search_dist, holder_gdf, crs, ax)
 
         holder_closest.append((r[0]['ID_SUP'].iloc[0], r[2]))
 
         for h in r[1]['ID_SUP']:
             holder_next_to.add(h)
 
-        # ==================|| Visual ||======================================================== #
-        if ax is not None:
-            r[0].plot(ax=ax, color='red', zorder=5)
-            r[1].plot(ax=ax, color="orange", zorder=4)
-            # interior = src_pt.buffer(r[2]).exterior.coords[::-1]
-            ring_sup = Polygon(src_pt.buffer(r[2] + 0.003).exterior)  # , [interior]
-            perimeter_max = src_pt.buffer(search_dist)
-            fg = GeoSeries([src_pt, ring_sup, perimeter_max], crs='epsg:4326')
-            figure = gpd.GeoDataFrame(geometry=gpd.GeoSeries(fg, crs='epsg:4326'))
-            figure = figure.to_crs(crs)
-            figure.loc[[0], 'geometry'].plot(ax=ax, color='green', zorder=3)
-            figure.loc[[1], 'geometry'].plot(ax=ax, color='none', edgecolor='red', zorder=2)
-            figure.loc[[2], 'geometry'].plot(ax=ax, color='none', edgecolor='green', linewidth=1, zorder=2)
-        # ======================================================================================= #
-
     return holder_closest, holder_next_to
 
 
-def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist=0.15, crs='epsg:4326'):  # Paris: 2.207737, 48.921505 180000.csv, # paumé: 15790 140000.csv
+def show_holder_around(file_path, ax, pos_in_file=0, lon=None, lat=None, search_dist=0.15, crs='epsg:4326'):  # Paris: 2.207737, 48.921505 180000.csv, # paumé: 15790 140000.csv
     """
     Display a map of French department with all file's squares and informations about the specific square selected.
     Legend: White square = square present in the file
@@ -222,15 +223,6 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
     holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
 
-    dept = gpd.read_file('departements-contour/departements-20180101.shp')
-    dept.crs = 'epsg:4326'
-    selected_col = ['code_insee', 'geometry']
-    dept = dept[selected_col]
-    dept = dept.loc[dept["code_insee"].isin(list(filter(lambda x: "97" not in x, dept['code_insee'])))]
-
-    dept = dept.to_crs(crs)
-    ax = dept.plot(color='White', edgecolor='k', linewidth=0.5, zorder=0)
-
     r = get_holder_square(carre_to_show.iloc[0], search_dist, holder_gdf, crs, ax)
 
     gdf_carre = gdf_carre.to_crs(crs)
@@ -241,7 +233,7 @@ def show_holder_around(file_path, pos_in_file=0, lon=None, lat=None, search_dist
     print('Nearest holder:', r[0])
     print("All near holders: ", r[1])
 
-    plt.show()
+    return ax
 
 
 def add_holder_to_square(file_path, holder_gdf, gdf_carre, start=1, end=None, search_dist=0.15):
@@ -286,56 +278,61 @@ def add_holder_to_square(file_path, holder_gdf, gdf_carre, start=1, end=None, se
     gdf_wanted.to_csv(file_path[:-4]+"["+str(start+1)+"-"+str(end)+"]"+"avecSup.csv", sep=';', columns=["'num'", "'IDsurface'", "'IDcrs'", "'x1'", "'y1'", "'x2'", "'y2'", "'x3'", "'y3'", "'x4'", "'y4'","'SupProchePt1'", "'SupProchePt2'", "'SupProchePt3'", "'SupProchePt4'", "'IdAllSupProche'"], index=False)
 
 
+def in_line_launcher():
+    print("init")
+    holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
+    geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
+    holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
+
+    gdf_carre = carresfile_to_dataframe(sys.argv[1])
+
+    print("init done")
+
+    return_fork = -1
+    step = round((int(sys.argv[3])-int(sys.argv[2]))/int(sys.argv[4]))
+    start = int(sys.argv[2])
+    end = start + step - 1
+    for i in range(int(sys.argv[4])+1):
+
+        if return_fork == 0:
+            print("start add holder")
+            print(start, end, step)
+            add_holder_to_square(sys.argv[1], holder_gdf, gdf_carre, start, end)
+            print("Temps d execution processus fils: %s secondes ---" % (time.time() - start_time))
+            exit(0)
+        else:
+            print("new process", i)
+            return_fork = os.fork()
+            if i > 0:
+                start += step
+                end = start + step - 1
+                if end > int(sys.argv[3]):
+                    end = int(sys.argv[3])
+
+    for i in range(int(sys.argv[4])):
+        print(os.wait())
+
+
 # Start time exec
 start_time = time.time()
-print("init")
-holder_df = pd.read_csv('tables/finalDB/SUPPORT.csv', delimiter=';')
-geometry = [Point(xy) for xy in zip(holder_df.NM_LONGITUDE, holder_df.NM_LATITUDE)]
-holder_gdf = GeoDataFrame(holder_df, crs='epsg:4326', geometry=geometry)
 
-gdf_carre = carresfile_to_dataframe(sys.argv[1])
+crs = 'epsg:4326'
+dept = gpd.read_file('departements-contour/departements-20180101.shp')
+dept.crs = 'epsg:4326'
+selected_col = ['code_insee', 'geometry']
+dept = dept[selected_col]
+dept = dept.loc[dept["code_insee"].isin(list(filter(lambda x: "97" not in x, dept['code_insee'])))]
+dept = dept.to_crs(crs)
+ax = dept.plot(color='White', edgecolor='k', linewidth=0.5, zorder=0)
 
-print("init done")
-
-return_fork = -1
-step = round((int(sys.argv[3])-int(sys.argv[2]))/int(sys.argv[4]))
-start = int(sys.argv[2])
-end = start + step - 1
-for i in range(int(sys.argv[4])+1):
-
-    if return_fork == 0:
-        print("start add holder")
-        print(start, end, step)
-        add_holder_to_square(sys.argv[1], holder_gdf, gdf_carre, start, end)
-        print("Temps d execution processus fils: %s secondes ---" % (time.time() - start_time))
-        exit(0)
-    else:
-        print("new process", i)
-        return_fork = os.fork()
-        if i > 0:
-            start += step
-            end = start + step - 1
-            if end > int(sys.argv[3]):
-                end = int(sys.argv[3])
-
-for i in range(int(sys.argv[4])):
-    print(os.wait())
+for i in range(53231, 53237):
+    show_holder_around('tables/carres/carres1100000.csv', pos_in_file=i, ax=ax)
+for i in range(53628, 53633):
+    show_holder_around('tables/carres/carres1100000.csv', pos_in_file=i, ax=ax)
+plt.show()
 
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
 
 
-# show_holder_around('tables/carres/carres1800000.csv', lon=2.207737, lat=48.921505)
-# show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505, crs='epsg:3395') 895760
-# argc = len(sys.argv)
-# if argc < 2:
-#     print("Use intern param")
-#     add_holder_to_square('tables/carrePlusDe10/carresALL.csv', end=5)
-# elif argc == 2:
-#     add_holder_to_square(sys.argv[1])
-# elif argc == 3:
-#     add_holder_to_square(sys.argv[1], start=int(sys.argv[2]))
-# else:
-#     add_holder_to_square(sys.argv[1], start=int(sys.argv[2]), end=int(sys.argv[3]))
-
-# Show execution time
+# show_holder_around('tables/carres/carres1800000.csv',  lon=2.207737, lat=48.921505)
 
