@@ -6,12 +6,12 @@ import numpy as np
 import time
 from progress.bar import IncrementalBar
 
-#Paths
+# Paths
 cAll = 'data/carresALL[essai]avecSup.csv'
 cStats = 'data/carres-stats-avec-nb-antennes'
 cEmetteur = 'data/EMETTEUR.csv'
 
-#Files
+# Files
 with open(cAll) as carre_file:
     cAll_df = pd.read_csv(carre_file, sep=';', quotechar="'")
 with open(cStats) as carre_file:
@@ -20,7 +20,7 @@ with open(cStats) as carre_file:
 with open(cEmetteur) as emetteur_file:
     cEmetteur_df = pd.read_csv(emetteur_file, sep=';', quotechar="'")
 
-#Functions
+# Functions
 def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dist=17000):
     """
     in: detail=échantillon (nombre de barres), 
@@ -55,7 +55,7 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
         for i in range (1,4): # 4 points du carré
             dist = int(row['SupProchePt'+str(i)].split('-')[1]) # distance de l'antenne au point      
             if (_verify_tech(row)): 
-                pop = carre.values[0][2] / 4 #values[0][2] => poptot
+                pop = carre.values[0][2] / 4 # values[0][2] => poptot
                 stat = carre.values[0][stat_index]
                 if ((stat>=threshold and not negative_threshold) or (stat<=threshold and negative_threshold)):
                     if (dist//interval < len(data)):
@@ -66,19 +66,19 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
                         else:
                             data.append(['Plus de '+str(msd), 0])
     bar.finish()
-    df = pd.DataFrame(data, columns=['Distance','Population'], dtype=float)
-    print(df)
-    df.plot.bar(x="Distance", y="Population", rot=25, title="Distances des supports les plus proches aux carrés de population")
+    df = pd.DataFrame(data, columns=['Distance (km)','Population'], dtype=float)
+    #print(df)
+    df.to_csv(r'statpop.csv', sep='\t', encoding='utf-16')
+    df.plot.bar(x="Distance (km)", y="Population", rot=25, title="Distances des supports les plus proches aux carrés de population")
     plot.xlabel("Distance au support le plus proche (km)")
     plot.ylabel("Volume total de population")
 
-#Main
-start_time = time.time()
-return_fork = -1
+# Main
 
-plot_chart(detail=10, stat='pcmenagespauvres', threshold=-2/3, tech='ALL', max_search_dist=3000)
-plot.savefig('statpop.png')
+start_time = time.time()
+plot_chart(detail=15, stat='poptot', threshold=0, tech='ALL', max_search_dist=10000)
+plot.savefig('statpop.pdf')
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
-plot.show()
+#plot.show()
 
 # distribution: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.hist.html
