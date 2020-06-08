@@ -27,8 +27,8 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
         stat=statistique INSEE à évaluer, 
         threshold=valeur de stat min pour être retenue (si négative, max), 
         tech=technologie de l'antenne
-        max_search_dist=distance de recherche en
-    out: graphique panda associé
+        max_search_dist=distance de recherche en km
+    out: histogramme panda associé
     """
     def _verify_tech (_row):
         if (tech!='ALL'):
@@ -49,6 +49,7 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
         threshold*=-1
     for i in range (detail):
         data.append([str(round((i*interval)/1000, 2))+' à '+str(round(((i+1)*interval-1)/1000, 2)), 0])
+    
     for index, row in cAll_df.iterrows():
         bar.next()
         carre = cStats_df[cStats_df['LAEA']==row['IDcrs']]
@@ -65,10 +66,11 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
                             data[-1][1]+=pop
                         else:
                             data.append(['Plus de '+str(msd), 0])
+
     bar.finish()
     df = pd.DataFrame(data, columns=['Distance (km)','Population'], dtype=float)
-    #print(df)
-    df.to_csv(r'statpop.csv', sep='\t', encoding='utf-16')
+    print(df)
+    #df.to_csv(r'statpop.csv', sep='\t', encoding='utf-16')
     df.plot.bar(x="Distance (km)", y="Population", rot=25, title="Distances des supports les plus proches aux carrés de population")
     plot.xlabel("Distance au support le plus proche (km)")
     plot.ylabel("Volume total de population")
@@ -77,8 +79,8 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
 
 start_time = time.time()
 plot_chart(detail=15, stat='poptot', threshold=0, tech='ALL', max_search_dist=10000)
-plot.savefig('statpop.pdf')
+#plot.savefig('statpop.pdf')
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
-#plot.show()
+plot.show()
 
 # distribution: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.hist.html
