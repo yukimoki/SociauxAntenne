@@ -7,18 +7,17 @@ import time
 from progress.bar import IncrementalBar
 
 # Paths
-cAll = 'data/carresALL[essai]avecSup.csv'
+cAll = 'data/CarresDistSupProche.csv'
 cStats = 'data/carres-stats-avec-nb-antennes'
-cEmetteur = 'data/EMETTEUR.csv'
 
 # Files
+print('Ouverture des fichiers...')
 with open(cAll) as carre_file:
     cAll_df = pd.read_csv(carre_file, sep=';', quotechar="'")
+    print('\t-Carrés INSEE avec leurs supports')
 with open(cStats) as carre_file:
     cStats_df = pd.read_csv(carre_file, sep='\s+')
-    header = list(cStats_df.columns.values)
-with open(cEmetteur) as emetteur_file:
-    cEmetteur_df = pd.read_csv(emetteur_file, sep=';', quotechar="'")
+    print('\t-Statistiques INSEE')
 
 # Functions
 def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dist=17000):
@@ -28,7 +27,7 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
         threshold=valeur de stat min pour être retenue (si négative, max), 
         tech=technologie de l'antenne
         max_search_dist=distance de recherche en km
-    out: histogramme panda associé
+    out: tableau [distance, population] associé
     """
     def _verify_tech (_row):
         if (tech!='ALL'):
@@ -39,9 +38,7 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
             return False
         return True
 
-    bar = IncrementalBar('Génération du diagramme', max=len(cAll_df))
     data = []
-    stat_index = header.index(stat)
     interval = max_search_dist/detail # 17km = distance max au support possible
     msd = round((detail*interval)/1000, 2)
     negative_threshold = (threshold<0)
@@ -49,16 +46,17 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
         threshold*=-1
     for i in range (detail):
         data.append([str(round((i*interval)/1000, 2))+' à '+str(round(((i+1)*interval-1)/1000, 2)), 0])
-    
-    for index, row in cAll_df.iterrows():
+    print('Jointure des fichiers...')
+    carres_df = cAll_df.join(cStats_df.set_index('LAEA'), on='IDcrs')
+    bar = IncrementalBar('Génération des données', max=len(cAll_df))
+    for index, row in carres_df.iterrows():
         bar.next()
-        carre = cStats_df[cStats_df['LAEA']==row['IDcrs']]
-        for i in range (1,4): # 4 points du carré
-            dist = int(row['SupProchePt'+str(i)].split('-')[1]) # distance de l'antenne au point      
-            if (_verify_tech(row)): 
-                pop = carre.values[0][2] / 4 # values[0][2] => poptot
-                stat = carre.values[0][stat_index]
-                if ((stat>=threshold and not negative_threshold) or (stat<=threshold and negative_threshold)):
+        if (_verify_tech(row)):
+            for i in range (1,4): # 4 points du carré
+                dist = int(row['DistSupProchePt'+str(i)]) # distance de l'antenne au point      
+                pop = row['poptot'] / 4
+                statpc = row[stat]
+                if ((statpc>=threshold and not negative_threshold) or (statpc<=threshold and negative_threshold)):
                     if (dist//interval < len(data)):
                         data[round(dist//interval)][1]+=pop
                     else:
@@ -70,7 +68,7 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
     bar.finish()
     df = pd.DataFrame(data, columns=['Distance (km)','Population'], dtype=float)
     print(df)
-    #df.to_csv(r'statpop.csv', sep='\t', encoding='utf-16')
+    df.to_csv(r'statpop250m.csv', sep='\t', encoding='utf-16')
     df.plot.bar(x="Distance (km)", y="Population", rot=25, title="Distances des supports les plus proches aux carrés de population")
     plot.xlabel("Distance au support le plus proche (km)")
     plot.ylabel("Volume total de population")
@@ -78,7 +76,7 @@ def plot_chart(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dis
 # Main
 
 start_time = time.time()
-plot_chart(detail=15, stat='poptot', threshold=0, tech='ALL', max_search_dist=10000)
+plot_chart(detail=25, stat='poptot', threshold=0, tech='ALL', max_search_dist=10000)
 #plot.savefig('statpop.pdf')
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
 plot.show()
