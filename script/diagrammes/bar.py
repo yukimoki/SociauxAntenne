@@ -21,7 +21,7 @@ with open(cStats) as carre_file:
     print('\t-Statistiques INSEE')
 
 # Functions
-def genData(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dist=17000):
+def genData(detail=10, stat='poptot', threshold=0, max_search_dist=17000):
     """
     in: detail=échantillon (nombre de barres), 
         stat=statistique INSEE à évaluer, 
@@ -30,14 +30,6 @@ def genData(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dist=1
         max_search_dist=distance de recherche en km
     out: tableau [distance, population] associé
     """
-    def _verify_tech (_row):
-        if (tech!='ALL'):
-            emetteur = cEmetteur_df[cEmetteur_df['ID_SUP']==int(_row['SupProchePt'+str(i)].split('-')[0])]
-            for description in emetteur.values:
-                if tech in description[3]:
-                    return True
-            return False
-        return True
     data = []
     interval = max_search_dist/detail # 17km = distance max au support possible
     msd = round((detail*interval)/1000, 2)
@@ -53,7 +45,6 @@ def genData(detail=10, stat='poptot', threshold=0, tech='ALL', max_search_dist=1
         bar.next()
         pop = row['poptot'] / 4
         statpc = row[stat]
-        #if (_verify_tech(row)):
         for i in range (1,5): # 4 points du carré
             dist = int(row['DistSupProchePt'+str(i)]) # distance de l'antenne au point
             if ((statpc>=threshold and not negative_threshold) or (statpc<=threshold and negative_threshold)):
@@ -79,9 +70,9 @@ def plotchart(df):
 # Main
 
 start_time = time.time()
-df = genData(detail=40, stat='pcmenagespauvres', threshold=0.1, tech='ALL', max_search_dist=10000)
+df = genData(detail=40, stat='poptot', threshold=0, max_search_dist=10000)
 print(df)
-df.to_csv(r'pcmenagespauvres_20pc250m.csv', sep='\t', encoding='utf-16', index=False)
+df.to_csv(r'poptot.csv', sep='\t', encoding='utf-16', index=False)
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
 #plotchart(df)
 
