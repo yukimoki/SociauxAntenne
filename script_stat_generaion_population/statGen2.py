@@ -6,9 +6,11 @@ import time
 
 start_time = time.time()
 
+#represente les tranches de population, la premier est entre 0 et tabListPop[0], puis tabListPop[0] et tabListPop[1] etc
 tabListPop = [50, 100, 250, 500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
 
-nbListPop = len(tabListPop)
+#nb de tranches
+nbListPop = len(tabListPop) + 1
 
 setsPopulation  = [set() for i in range(nbListPop)]
 
@@ -50,7 +52,7 @@ with open('../tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File:
     next(file_reader)
     for row in file_reader:
 
-        i = nbListPop - 1
+        i = nbListPop - 2
 
         trouve = False
 
@@ -71,7 +73,8 @@ with open('../tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File:
 
 def toutEmetteurConfondus():
 
-    tabGeneration = [[0 for i in range(nbListPop)] for j in range(4)]
+    #tableau 2D qui représente chaque génération d'életteurs (2G, 3G, 4G puis 5G)
+    tabGeneration = [[0 for compteurPopulation in range(nbListPop)] for generation in range(4)]
 
     with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
         file_readerSup = csv.reader(FileSup, delimiter=';')
@@ -85,31 +88,22 @@ def toutEmetteurConfondus():
 
                 trouve = False
 
-                while i < nbListPop and trouve==False:
+                while i < nbListPop - 1 and trouve==False:
 
                     if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
                         trouve = True
 
-                        if(tabGen[0]):
-                            tabGeneration[0][i] += 1
-                        if(tabGen[1]):
-                            tabGeneration[1][i] += 1
-                        if(tabGen[2]):
-                            tabGeneration[2][i] += 1
-                        if(tabGen[3]):
-                            tabGeneration[3][i] += 1
+                        for generation in range(4):
+                            if(tabGen[generation]):
+                                tabGeneration[generation][i] += 1
 
                     i+=1
 
                 if trouve == False:
-                    if(tabGen[0]):
-                        tabGeneration[0][nbListPop - 1] += 1
-                    if(tabGen[1]):
-                        tabGeneration[1][nbListPop - 1] += 1
-                    if(tabGen[2]):
-                        tabGeneration[2][nbListPop - 1] += 1
-                    if(tabGen[3]):
-                        tabGeneration[3][nbListPop - 1] += 1
+
+                    for generation in range(4):
+                        if(tabGen[generation]):
+                            tabGeneration[generation][nbListPop - 1] += 1
 
 
     data = {
@@ -119,7 +113,13 @@ def toutEmetteurConfondus():
             "5G":tabGeneration[3]
             };
 
-    index = ["<"+str(tabListPop[i]/1000) for i in range(nbListPop)]
+    index = ["" for i in range(nbListPop)]
+
+    for i in range(nbListPop-1):
+        index[i] = "<"+str(tabListPop[i]/1000)
+    
+    index[nbListPop-1] = ">"+str(tabListPop[nbListPop-2]/1000)
+
     columns = ["2G", "3G", "4G", "5G"]
 
     dataFrame = pd.DataFrame(data=data, index=index, columns=columns);
@@ -148,7 +148,7 @@ def emetteurGenMax():
 
                 trouve = False
 
-                while i < nbListPop and trouve==False:
+                while i < nbListPop - 1 and trouve==False:
 
                     if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
                         trouve = True
@@ -182,7 +182,13 @@ def emetteurGenMax():
             "5G":tabGeneration[3]
             };
 
-    index = ["<"+str(tabListPop[i]/1000) for i in range(nbListPop)]
+    index = ["" for i in range(nbListPop)]
+
+    for i in range(nbListPop-1):
+        index[i] = "<"+str(tabListPop[i]/1000)
+    
+    index[nbListPop-1] = ">="+str(tabListPop[nbListPop-2]/1000)
+
     columns = ["2G", "3G", "4G", "5G"]
     dataFrame = pd.DataFrame(data=data, index=index);
 
