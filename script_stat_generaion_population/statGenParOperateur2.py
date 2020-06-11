@@ -10,7 +10,8 @@ import os
 start_time = time.time()
 
 #represente les tranches de population, la premier est entre 0 et tabListPop[0], puis tabListPop[0] et tabListPop[1] etc
-tabListPop = [50, 100, 250, 500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
+#[50, 100, 250, 500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
+tabListPop = [500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
 
 nbListPop = len(tabListPop) + 1
 
@@ -209,9 +210,12 @@ def toutEmetteurConfondus():
     index = ["" for i in range(nbListPop)]
 
     for i in range(nbListPop-1):
-        index[i] = "<"+str(tabListPop[i]/1000)
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
     
-    index[nbListPop-1] = ">="+str(tabListPop[nbListPop-2]/1000)
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
 
     columns = ["2G", "3G", "4G", "5G"]
 
@@ -240,7 +244,7 @@ def toutEmetteurConfondus():
 
     #sauvegarde de tous les graphiques en proportion de leur ordonné maximum
     dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Free Mobile")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousFree.png')
@@ -248,15 +252,15 @@ def toutEmetteurConfondus():
 
 
     dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de SFR")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Telecom")
-    plot.ylabel("Nombre de supports")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Télécom")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousBouygues.png')
@@ -264,7 +268,7 @@ def toutEmetteurConfondus():
 
 
     dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population d'Orange")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousOrange.png')
@@ -274,7 +278,7 @@ def toutEmetteurConfondus():
     #sauvegarde de tout les graphiques en fonction de l'ordonné maximale de tout les graphes
     dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Free Mobile")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousFree.png')
@@ -283,16 +287,16 @@ def toutEmetteurConfondus():
 
     dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de SFR")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Telecom")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Télécom")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousBouygues.png')
@@ -301,13 +305,13 @@ def toutEmetteurConfondus():
 
     dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population d'Orange")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousOrange.png')
     plot.clf()
 
-    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Telecom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurTous.png')
+    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurTous.png', "Nombre d'émetteurs par génération, population et opérateur")
 
 
 def emetteurGenMax():
@@ -389,9 +393,12 @@ def emetteurGenMax():
     index = ["" for i in range(nbListPop)]
 
     for i in range(nbListPop-1):
-        index[i] = "<"+str(tabListPop[i]/1000)
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
     
-    index[nbListPop-1] = ">="+str(tabListPop[nbListPop-2]/1000)
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
 
     columns = ["2G", "3G", "4G", "5G"]
 
@@ -419,32 +426,32 @@ def emetteurGenMax():
     dfBouygues = pd.DataFrame(data=dataBouygues, index=index, columns=columns);
 
     #sauvegarde de tous les graphiques en proportion de leur ordonné maximum
-    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Free Mobile")
-    plot.ylabel("Nombre de supports")
+    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Free Mobile")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxFree.png')
     plot.clf()
 
 
-    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de SFR")
-    plot.ylabel("Nombre de supports")
+    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de SFR")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Bouygues Telecom")
-    plot.ylabel("Nombre de supports")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Bouygues Télécom")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxBouygues.png')
     plot.clf()
 
 
-    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population d'Orange")
-    plot.ylabel("Nombre de supports")
+    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population d'Orange")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxOrange.png')
@@ -452,42 +459,42 @@ def emetteurGenMax():
 
 
     #sauvegarde de tout les graphiques en fonction de l'ordonné maximale de tout les graphes
-    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Free Mobile")
+    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Free Mobile")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxFree.png')
     plot.clf()
 
 
-    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de SFR")
+    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de SFR")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Bouygues Telecom")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Bouygues Télécom")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxBouygues.png')
     plot.clf()
 
 
-    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population d'Orange")
+    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population d'Orange")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxOrange.png')
     plot.clf()
 
-    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Telecom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurGenMax.png', "Nombre d'émetteurs par génération max/support, population et operateur")
+    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurGenMax.png', "Nombre d'émetteurs de génération max par population et opérateur")
 
 toutEmetteurConfondus()
 emetteurGenMax()
