@@ -1,8 +1,7 @@
 import csv
 import pandas as pd
 import matplotlib.pyplot as plot
-import hvplot
-import hvplot.pandas
+
 
 name = {}
 ville = {}
@@ -36,25 +35,37 @@ with open('tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup:
 
             
 print("ok")
+label = []
 titi = []
 tooa = []
 for y, item in tab.items():
     titi.append(int(ville[y]))
     tooa.append(int(item)/int(division[y]))
-    if(int(item)/int(division[y])>150):
+    if(int(item)/int(division[y])>100)|(int(ville[y])>190000):
+        label.append(name[y])
         print(name[y],y, " :",int(item)/int(division[y]), "supports pour ", int(ville[y]), "habitants")
+    else:
+        label.append("")
 
 data = {"numpop":titi,
-        "support":tooa
+        "support":tooa,
+        "label":label
         };
 
 
 dataFrame = pd.DataFrame(data=data);
 
-dataFrame.plot(kind='scatter', x='numpop', y='support', color='red', title="Nombre de support en fonction de la population de la commune");
+ax = dataFrame.plot(kind='scatter', x='numpop', y='support', color='red', title="Nombre de support en fonction de la population de la commune");
 plot.ylabel("Nombre de support")
 plot.xlabel("Nombre d'habitants")
 plot.tight_layout()
+def label_point(x, y, val, ax):
+    a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
+    for i, point in a.iterrows():
+        ax.text(point['x'], point['y'], str(point['val']))
+
+label_point(dataFrame.numpop, dataFrame.support, dataFrame.label, ax)
+
 print("okau")
 plot.savefig('tables/newstatpop.png')
 print("fin")
