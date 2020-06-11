@@ -7,7 +7,7 @@ import time
 start_time = time.time()
 
 #represente les tranches de population, la premier est entre 0 et tabListPop[0], puis tabListPop[0] et tabListPop[1] etc
-tabListPop = [50, 100, 250, 500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
+tabListPop = [500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
 
 #nb de tranches
 nbListPop = len(tabListPop) + 1
@@ -116,16 +116,19 @@ def toutEmetteurConfondus():
     index = ["" for i in range(nbListPop)]
 
     for i in range(nbListPop-1):
-        index[i] = "<"+str(tabListPop[i]/1000)
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
     
-    index[nbListPop-1] = ">"+str(tabListPop[nbListPop-2]/1000)
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
 
     columns = ["2G", "3G", "4G", "5G"]
 
     dataFrame = pd.DataFrame(data=data, index=index, columns=columns);
 
     dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenTous.png')
@@ -185,15 +188,18 @@ def emetteurGenMax():
     index = ["" for i in range(nbListPop)]
 
     for i in range(nbListPop-1):
-        index[i] = "<"+str(tabListPop[i]/1000)
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
     
-    index[nbListPop-1] = ">="+str(tabListPop[nbListPop-2]/1000)
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
 
     columns = ["2G", "3G", "4G", "5G"]
     dataFrame = pd.DataFrame(data=data, index=index);
 
-    dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max/support et population")
-    plot.ylabel("Nombre de supports")
+    dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenMax.png')
