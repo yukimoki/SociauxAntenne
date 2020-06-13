@@ -6,23 +6,23 @@ from progress.bar import Bar
 import matplotlib.pyplot as plt
 import stat
 
-df_carres_sup = pd.read_csv('tables/finalDB/CarresDistSupProche.csv', delimiter=";", usecols=["IDcrs", "IdSupProchePt1", "DistSupProchePt1", "IdSupProchePt2", "DistSupProchePt2", "IdSupProchePt3", "DistSupProchePt3", "IdSupProchePt4", "DistSupProchePt4"])
-df_carres_socio = pd.read_csv('tables/finalDB/StatsSocioCarres.csv', delimiter="\t", usecols=["LAEA", "poptot", "pcmenagespauvres"])
-
-df_carres = df_carres_sup.join(df_carres_socio.set_index('LAEA'), on='IDcrs')
-df_carres = df_carres.loc[df_carres['poptot'] > 100]
-data_dict = {}
-bar = Bar('traitement carres', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=len(df_carres)-1)
-for idx, carre in df_carres.iterrows():
-    pop_total, pc_pauvre = df_carres.loc[idx, ['poptot', 'pcmenagespauvres']].values
-    pop_pauvre = pop_total * pc_pauvre
-    stat_square = [pop_total, pop_pauvre]
-    data_dict[pop_total] = [data_dict.setdefault(pop_total, [0, 0])[i] + stat_square[i] for i in range(len(stat_square))]
-    bar.next()
-bar.finish()
-df_stat = pd.DataFrame.from_dict(data=data_dict, columns=['POP_TOTAL', 'POP_PAUVRE'], orient='index')
-print(df_stat)
-df_stat.to_csv('tables/finalDB/tmp_stat.csv', sep=";")
+# df_carres_sup = pd.read_csv('tables/finalDB/CarresDistSupProche.csv', delimiter=";", usecols=["IDcrs", "IdSupProchePt1", "DistSupProchePt1", "IdSupProchePt2", "DistSupProchePt2", "IdSupProchePt3", "DistSupProchePt3", "IdSupProchePt4", "DistSupProchePt4"])
+# df_carres_socio = pd.read_csv('tables/finalDB/StatsSocioCarres.csv', delimiter="\t", usecols=["LAEA", "poptot", "pcmenagespauvres"])
+#
+# df_carres = df_carres_sup.join(df_carres_socio.set_index('LAEA'), on='IDcrs')
+# df_carres = df_carres.loc[df_carres['poptot'] > 100]
+# data_dict = {}
+# bar = Bar('traitement carres', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=len(df_carres)-1)
+# for idx, carre in df_carres.iterrows():
+#     pop_total, pc_pauvre = df_carres.loc[idx, ['poptot', 'pcmenagespauvres']].values
+#     pop_pauvre = pop_total * pc_pauvre
+#     stat_square = [pop_total, pop_pauvre]
+#     data_dict[pop_total] = [data_dict.setdefault(pop_total, [0, 0])[i] + stat_square[i] for i in range(len(stat_square))]
+#     bar.next()
+# bar.finish()
+# df_stat = pd.DataFrame.from_dict(data=data_dict, columns=['POP_TOTAL', 'POP_PAUVRE'], orient='index')
+# print(df_stat)
+# df_stat.to_csv('tables/finalDB/tmp_stat.csv', sep=";")
 # ****************************************************************************
 
 df_stat = pd.read_csv('tables/finalDB/tmp_stat.csv', sep=";", dtype='float64', header=0, names=['POP_CARRE', 'POP_TOTAL', 'POP_PAUVRE'])

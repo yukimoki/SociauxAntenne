@@ -5,12 +5,17 @@ from progress.bar import Bar
 import matplotlib.pyplot as plt
 import stat
 
+# Initialisation des dataframes
 df_carres_sup = pd.read_csv('tables/finalDB/CarresDistSupProche.csv', delimiter=";", usecols=["IDcrs", "IdSupProchePt1", "DistSupProchePt1", "IdSupProchePt2", "DistSupProchePt2", "IdSupProchePt3", "DistSupProchePt3", "IdSupProchePt4", "DistSupProchePt4"])
 df_carres_socio = pd.read_csv('tables/finalDB/StatsSocioCarres.csv', delimiter="\t", usecols=["LAEA", "poptot", "pcmenagespauvres"])
 
+# Jointure des df carres dist et socio
 df_carres = df_carres_sup.join(df_carres_socio.set_index('LAEA'), on='IDcrs')
+
 df_carres = df_carres.loc[df_carres['poptot'] > 100]
-hab_by_holder = dict()
+
+# Traitement
+hab_by_holder = dict()  # {id_sup: [pop_total, pop_pauvre, pop_nonpauvre]}
 bar = Bar('find total nbHab for each holder', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=len(df_carres)-1)
 for idx, carre in df_carres[["IdSupProchePt1", "IdSupProchePt2", "IdSupProchePt3", "IdSupProchePt4"]].iterrows():
     pop_total, pc_pauvre = df_carres.loc[idx, ['poptot', 'pcmenagespauvres']].values
@@ -75,7 +80,7 @@ while not stop:
             if list_param[6] == "on":
                 df_stat[list_param[2]].plot.density()
             else:
-                # df_stat['POP_NON_PAUVRE'].plot.hist(bins=int(list_param[5]), alpha=0.5)#
+                # df_stat['POP_NON_PAUVRE'].plot.hist(bins=int(list_param[5]), alpha=0.5)
                 # df_stat['POP_PAUVRE'].plot.hist(bins=int(list_param[5]), alpha=0.5)
                 df_stat.hist(bins=int(list_param[5]), column=list_param[2])
             plt.title(list_param[0]+"\nCritère étudié: "+str(list_param[2]), fontsize=20)
