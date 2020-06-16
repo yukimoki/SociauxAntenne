@@ -6,27 +6,13 @@ import time
 
 start_time = time.time()
 
-listInf05M = set() #len = 18 403
+#represente les tranches de population, la premier est entre 0 et tabListPop[0], puis tabListPop[0] et tabListPop[1] etc
+tabListPop = [500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
 
-listInf1M = set() #len = 6 672
+#nb de tranches
+nbListPop = len(tabListPop) + 1
 
-listInf5M = set() #len = 7 713
-
-listInf10M = set() #len = 1 181
-
-listInf20M = set() #len = 524
-
-listInf40M = set() #len = 278
-
-listInf60M =set() #len = 93
-
-listInf80M = set() #len = 34
-
-listInf100M = set() #len = 17
-
-listInf140M = set() #len = 18
-
-listSup140M = set() #len = 24
+setsPopulation  = [set() for i in range(nbListPop)]
 
 #dictionnaire qui contient toutes les stations et un tableau de booléen pour chaque génération d'emetteur 
 d = {}
@@ -65,58 +51,30 @@ with open('../tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File:
     file_reader = csv.reader(File, delimiter=';')
     next(file_reader)
     for row in file_reader:
-        if(int(row[2])>140000):
+
+        i = nbListPop - 2
+
+        trouve = False
+
+        while i > 0 and trouve==False:
+
+            if(int(row[2])>=tabListPop[i]):
+                trouve = True
+                temp = row[0].split(",")
+                for j in temp:
+                    setsPopulation[i].add(j)
+
+            i-=1
+
+        if trouve==False:
             temp = row[0].split(",")
-            for i in temp:
-                listSup140M.add(i)
-        elif(int(row[2])>100000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf140M.add(i)
-        elif(int(row[2])>80000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf100M.add(i)
-        elif(int(row[2])>60000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf80M.add(i)
-        elif(int(row[2])>40000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf60M.add(i)
-        elif(int(row[2])>20000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf40M.add(i)
-        elif(int(row[2])>10000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf20M.add(i)
-        elif(int(row[2])>5000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf10M.add(i)
-        elif(int(row[2])>1000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf5M.add(i)
-        elif(int(row[2])>500):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf1M.add(i)
-        else:
-            temp = row[0].split(",")
-            for i in temp:
-                listInf05M.add(i)
+            for j in temp:
+                setsPopulation[0].add(j)
 
 def toutEmetteurConfondus():
 
-    gen2G = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3G = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4G = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5G = [0,0,0,0,0,0,0,0,0,0,0]
-
+    #tableau 2D qui représente chaque génération d'életteurs (2G, 3G, 4G puis 5G)
+    tabGeneration = [[0 for compteurPopulation in range(nbListPop)] for generation in range(4)]
 
     with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
         file_readerSup = csv.reader(FileSup, delimiter=';')
@@ -125,122 +83,52 @@ def toutEmetteurConfondus():
 
             if(support[0] in d):
                 tabGen = d[support[0]]
-                
-                if(listInf05M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[0] += 1
-                    if(tabGen[1]):
-                        gen3G[0] += 1
-                    if(tabGen[2]):
-                        gen4G[0] += 1
-                    if(tabGen[3]):
-                        gen5G[0] += 1
-                elif(listInf1M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[1] += 1
-                    if(tabGen[1]):
-                        gen3G[1] += 1
-                    if(tabGen[2]):
-                        gen4G[1] += 1
-                    if(tabGen[3]):
-                        gen5G[1] += 1
-                elif(listInf5M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[2] += 1
-                    if(tabGen[1]):
-                        gen3G[2] += 1
-                    if(tabGen[2]):
-                        gen4G[2] += 1
-                    if(tabGen[3]):
-                        gen5G[2] += 1
-                elif(listInf10M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[3] += 1
-                    if(tabGen[1]):
-                        gen3G[3] += 1
-                    if(tabGen[2]):
-                        gen4G[3] += 1
-                    if(tabGen[3]):
-                        gen5G[3] += 1
-                elif(listInf20M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[4] += 1
-                    if(tabGen[1]):
-                        gen3G[4] += 1
-                    if(tabGen[2]):
-                        gen4G[4] += 1
-                    if(tabGen[3]):
-                        gen5G[4] += 1
-                elif(listInf40M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[5] += 1
-                    if(tabGen[1]):
-                        gen3G[5] += 1
-                    if(tabGen[2]):
-                        gen4G[5] += 1
-                    if(tabGen[3]):
-                        gen5G[5] += 1
-                elif(listInf60M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[6] += 1
-                    if(tabGen[1]):
-                        gen3G[6] += 1
-                    if(tabGen[2]):
-                        gen4G[6] += 1
-                    if(tabGen[3]):
-                        gen5G[6] += 1
-                elif(listInf80M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[7] += 1
-                    if(tabGen[1]):
-                        gen3G[7] += 1
-                    if(tabGen[2]):
-                        gen4G[7] += 1
-                    if(tabGen[3]):
-                        gen5G[7] += 1
-                elif(listInf100M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[8] += 1
-                    if(tabGen[1]):
-                        gen3G[8] += 1
-                    if(tabGen[2]):
-                        gen4G[8] += 1
-                    if(tabGen[3]):
-                        gen5G[8] += 1
-                elif(listInf140M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[9] += 1
-                    if(tabGen[1]):
-                        gen3G[9] += 1
-                    if(tabGen[2]):
-                        gen4G[9] += 1
-                    if(tabGen[3]):
-                        gen5G[9] += 1
-                elif(listSup140M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[0]):
-                        gen2G[10] += 1
-                    if(tabGen[1]):
-                        gen3G[10] += 1
-                    if(tabGen[2]):
-                        gen4G[10] += 1
-                    if(tabGen[3]):
-                        gen5G[10] += 1
+
+                i = 0
+
+                trouve = False
+
+                while i < nbListPop - 1 and trouve==False:
+
+                    if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
+                        trouve = True
+
+                        for generation in range(4):
+                            if(tabGen[generation]):
+                                tabGeneration[generation][i] += 1
+
+                    i+=1
+
+                if trouve == False:
+
+                    for generation in range(4):
+                        if(tabGen[generation]):
+                            tabGeneration[generation][nbListPop - 1] += 1
 
 
     data = {
-            "2G":gen2G,
-            "3G":gen3G,
-            "4G":gen4G,
-            "5G":gen5G
+            "2G":tabGeneration[0],
+            "3G":tabGeneration[1],
+            "4G":tabGeneration[2],
+            "5G":tabGeneration[3]
             };
 
-    index = ["0-0.5", "0.5-1", "1-5", "5-10", "10-20", "20-40", "40-60", "60-80", "80-100", "100-140", ">140"]
+    index = ["" for i in range(nbListPop)]
+
+    for i in range(nbListPop-1):
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
+    
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
+
     columns = ["2G", "3G", "4G", "5G"]
 
     dataFrame = pd.DataFrame(data=data, index=index, columns=columns);
 
     dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenTous.png')
@@ -249,133 +137,69 @@ def toutEmetteurConfondus():
 def emetteurGenMax():
 
 
-    gen2G = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3G = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4G = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5G = [0,0,0,0,0,0,0,0,0,0,0]
+    tabGeneration = [[0 for i in range(nbListPop)] for j in range(4)]
 
     with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
         file_readerSup = csv.reader(FileSup, delimiter=';')
         next(file_readerSup)
         for support in file_readerSup:
 
-            if(support[0].replace("'","") in d):
-                tabGen = d[support[0].replace("'","")]
-                
-                if(listInf05M.__contains__(support[5].replace("'", ""))):
+            if(support[0] in d):
+                tabGen = d[support[0]]
+
+                i = 0
+
+                trouve = False
+
+                while i < nbListPop - 1 and trouve==False:
+
+                    if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
+                        trouve = True
+
+                        if(tabGen[3]):
+                            tabGeneration[3][i] += 1
+                        elif(tabGen[2]):
+                            tabGeneration[2][i] += 1
+                        elif(tabGen[1]):
+                            tabGeneration[1][i] += 1
+                        elif(tabGen[0]):
+                            tabGeneration[0][i] += 1
+
+                    i+=1
+
+                if trouve == False:
                     if(tabGen[3]):
-                        gen5G[0] += 1
+                        tabGeneration[3][nbListPop - 1] += 1
                     elif(tabGen[2]):
-                        gen4G[0] += 1
+                        tabGeneration[2][nbListPop - 1] += 1
                     elif(tabGen[1]):
-                        gen3G[0] += 1
+                        tabGeneration[1][nbListPop - 1] += 1
                     elif(tabGen[0]):
-                        gen2G[0] += 1
-                elif(listInf1M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[1] += 1
-                    elif(tabGen[2]):
-                        gen4G[1] += 1
-                    elif(tabGen[1]):
-                        gen3G[1] += 1
-                    elif(tabGen[0]):
-                        gen2G[1] += 1
-                elif(listInf5M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[2] += 1
-                    elif(tabGen[2]):
-                        gen4G[2] += 1
-                    elif(tabGen[1]):
-                        gen3G[2] += 1
-                    elif(tabGen[0]):
-                        gen2G[2] += 1
-                elif(listInf10M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[3] += 1
-                    elif(tabGen[2]):
-                        gen4G[3] += 1
-                    elif(tabGen[1]):
-                        gen3G[3] += 1
-                    elif(tabGen[0]):
-                        gen2G[3] += 1
-                elif(listInf20M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[4] += 1
-                    elif(tabGen[2]):
-                        gen4G[4] += 1
-                    elif(tabGen[1]):
-                        gen3G[4] += 1
-                    elif(tabGen[0]):
-                        gen2G[4] += 1
-                elif(listInf40M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[5] += 1
-                    elif(tabGen[2]):
-                        gen4G[5] += 1
-                    elif(tabGen[1]):
-                        gen3G[5] += 1
-                    elif(tabGen[0]):
-                        gen2G[5] += 1
-                elif(listInf60M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[6] += 1
-                    elif(tabGen[2]):
-                        gen4G[6] += 1
-                    elif(tabGen[1]):
-                        gen3G[6] += 1
-                    elif(tabGen[0]):
-                        gen2G[6] += 1
-                elif(listInf80M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[7] += 1
-                    elif(tabGen[2]):
-                        gen4G[7] += 1
-                    elif(tabGen[1]):
-                        gen3G[7] += 1
-                    elif(tabGen[0]):
-                        gen2G[7] += 1
-                elif(listInf100M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[8] += 1
-                    elif(tabGen[2]):
-                        gen4G[8] += 1
-                    elif(tabGen[1]):
-                        gen3G[8] += 1
-                    elif(tabGen[0]):
-                        gen2G[8] += 1
-                elif(listInf140M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[9] += 1
-                    elif(tabGen[2]):
-                        gen4G[9] += 1
-                    elif(tabGen[1]):
-                        gen3G[9] += 1
-                    elif(tabGen[0]):
-                        gen2G[9] += 1
-                elif(listSup140M.__contains__(support[5].replace("'", ""))):
-                    if(tabGen[3]):
-                        gen5G[10] += 1
-                    elif(tabGen[2]):
-                        gen4G[10] += 1
-                    elif(tabGen[1]):
-                        gen3G[10] += 1
-                    elif(tabGen[0]):
-                        gen2G[10] += 1
+                        tabGeneration[0][nbListPop - 1] += 1
 
 
     data = {
-            "2G":gen2G,
-            "3G":gen3G,
-            "4G":gen4G,
-            "5G":gen5G
+            "2G":tabGeneration[0],
+            "3G":tabGeneration[1],
+            "4G":tabGeneration[2],
+            "5G":tabGeneration[3]
             };
 
-    index = ["0-0.5", "0.5-1", "1-5", "5-10", "10-20", "20-40", "40-60", "60-80", "80-100", "100-140", ">140"]
+    index = ["" for i in range(nbListPop)]
+
+    for i in range(nbListPop-1):
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
+    
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
+
     columns = ["2G", "3G", "4G", "5G"]
     dataFrame = pd.DataFrame(data=data, index=index);
 
-    dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max/support et population")
-    plot.ylabel("Nombre de supports")
+    dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenMax.png')
