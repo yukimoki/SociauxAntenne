@@ -41,9 +41,12 @@ tooa = []
 for y, item in tab.items():
     titi.append(int(ville[y]))
     tooa.append(int(item)/int(division[y]))
-    if(int(item)/int(division[y])>100)|(int(ville[y])>190000):
-        label.append(name[y])
-        print(name[y],y, " :",int(item)/int(division[y]), "supports pour ", int(ville[y]), "habitants")
+    if(int(item)/int(division[y])>60)|(int(ville[y])>190000):
+        if((int(y)%100)>0):
+            label.append(name[y]+str(int(y)%1000))
+        else:
+            label.append(name[y])
+        print(name[y],y, " :",int(item)/int(division[y]), "supports pour ", str(ville[y]), "habitants")
     else:
         label.append("")
 
@@ -69,4 +72,7 @@ label_point(dataFrame.numpop, dataFrame.support, dataFrame.label, ax)
 print("okau")
 plot.savefig('tables/newstatpop.png')
 print("fin")
+print(tab["75008"])
+print(division["75008"])
 plot.show()
+
