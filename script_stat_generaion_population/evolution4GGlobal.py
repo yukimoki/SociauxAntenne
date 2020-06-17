@@ -43,7 +43,7 @@ with open('../tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File:
                 setsPopulation[0].add(j)
 
 d = {}
-#on récupère tous les supports des régions concernées
+
 with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup:
     file_readerSup = csv.reader(FileSup, delimiter=';')
     next(file_readerSup)
@@ -105,7 +105,7 @@ with open('../tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
 					j += 1
 
 				if trouveTranchePop == False:
-					tranchePop = 0
+					tranchePop = nbListPop - 1
 
 				tabAnneePop[trancheAnnee][tranchePop] += 1
 
@@ -127,16 +127,18 @@ with open('../tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
     
 	index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
 
+	plot.rcParams["figure.figsize"] = (12, 8)
+
 	fig, ax = plot.subplots()
 
-	width = 0.2
+	width = 1/4
 
 	ind = np.arange(len(tabAnneePop[0]))
 
-	ax.bar(ind + width, tabAnneePop[0], width, label='<2011')
-	ax.bar(ind + 2*width, tabAnneePop[1], width, label='2011-2014')
-	ax.bar(ind - 2*width, tabAnneePop[2], width, label='2014-2017')
-	ax.bar(ind - width, tabAnneePop[3], width, label='>2017')
+	ax.bar(ind - width, tabAnneePop[0], width, label='<2011')
+	ax.bar(ind, tabAnneePop[1], width, label='2011-2014')
+	ax.bar(ind + width, tabAnneePop[2], width, label='2014-2017')
+	ax.bar(ind + 2*width, tabAnneePop[3], width, label='>2017')
 
 
 	ax.set_ylabel("Nombre d'émetteurs 4G")
@@ -148,6 +150,22 @@ with open('../tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
 
 	fig.tight_layout()
 
-	plot.savefig('../statistiques/emetteur_population_support/statAnneeGlobal.png')
+	"""
+
+	plot.grid(b=True, which='major', axis='both')
+
+	plot.plot(index, tabAnneePop[0], label='<2011', marker ="o")
+	plot.plot(index, tabAnneePop[1], label='2011-2014', ls = "-.", marker ="o")
+	plot.plot(index, tabAnneePop[2], label='2014-2017', ls="--", marker ="o")
+	plot.plot(index, tabAnneePop[3], label='>2017', ls= ':', marker ="o")
+	plot.title("Nombre d'émetteurs 4G par année et par population", fontsize=25)
+	plot.ylabel("Nombre d'émetteurs 4G", fontsize=15)
+	plot.xlabel("Année", fontsize=15)
+
+	plot.legend()
+
+	"""
+
+	plot.savefig('../statistiques/emetteur_population_support/StatParAnnee/statAnneeGlobal.png')
     
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
