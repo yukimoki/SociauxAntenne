@@ -30,9 +30,9 @@ python3 algo.py carresALL.csv 100 200 4
 
 Par exemple cette commande cherche dans carresALL.csv du 100e carré au 200e carré réparti sur 4 processus
 
-##### onlymobile
+##### OnlyMobile.py
 
-Le script onlymobile permet de crée la base de donnée à partir des fichier SUP, il est nécessaire d'avoir ces fichiers dans le dossier tables/. Il est nécessaire d'avoir un dossier finalDB/ dans le dossier tables/.
+Le script OnlyMobile.py permet de crée la base de donnée à partir des fichier SUP, il est nécessaire d'avoir ces fichiers dans le dossier tables/. Il est nécessaire d'avoir un dossier finalDB/ dans le dossier tables/.
 
 ##### carre.py
 
