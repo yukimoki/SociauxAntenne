@@ -1,8 +1,7 @@
 import csv
 import pandas as pd
 import matplotlib.pyplot as plot
-import hvplot
-import hvplot.pandas
+
 
 name = {}
 ville = {}

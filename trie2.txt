@@ -1,4 +1,0 @@
-5G
-GSM
-LTE
-UMTS
