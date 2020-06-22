@@ -1,23 +1,43 @@
 import csv
 import pandas as pd
-import matplotlib.pyplot as plot
+import matplotlib.pyplot as plt
 import sys
 import time
 
 start_time = time.time()
 
-#represente les tranches de population, la premier est entre 0 et tabListPop[0], puis tabListPop[0] et tabListPop[1] etc
-tabListPop = [500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
+#represente les tranches de population
+tabListPop = [[0, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
+
+figsize = (12, 8)
+
+tailleTitre = 25
+
+titre = "Nombre d'émetteurs par génération et population"
+titreMax = "Nombre d'émetteurs de génération maximale\n et par population"
+
+tailleOrdonnee = 15
+tailleAbscisse = 15
+texteAbscisse = "Nombre d'habitants (en milliers)"
+texteOrdonnee = "Nombre d'émetteurs"
 
 #nb de tranches
-nbListPop = len(tabListPop) + 1
+nbListPop = len(tabListPop)
 
 setsPopulation  = [set() for i in range(nbListPop)]
 
-#dictionnaire qui contient toutes les stations et un tableau de booléen pour chaque génération d'emetteur 
-d = {}
+def is_integer(n):
+    try:
+        float(n)
+    except ValueError:
+        return False
+    else:
+        return float(n).is_integer()
 
-with open('../tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
+#dictionnaire qui contient toutes les stations et un tableau de booléen pour chaque génération d'emetteur 
+dictionnaireSupport = {}
+
+with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
     file_readerEme = csv.reader(FileEme, delimiter=';')
     next(file_readerEme)
     
@@ -37,58 +57,60 @@ with open('../tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
         elif("NG" in emetteur[3]):
             tabGen[3] = True
 
-        if(numSup in d):
+        if(numSup in dictionnaireSupport):
             
-            oldTabGen = d[numSup]
+            oldTabGen = dictionnaireSupport[numSup]
             for i in range(4):
                 if(tabGen[i]==True or oldTabGen[i]==True):
                     tabGen[i] = True
         
-        d[numSup] = tabGen
+        dictionnaireSupport[numSup] = tabGen
         tabGen = [False, False, False, False]
 
-with open('../tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File: 
+with open('../script/tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File: 
     file_reader = csv.reader(File, delimiter=';')
     next(file_reader)
     for row in file_reader:
 
-        i = nbListPop - 2
+        i = 0
 
         trouve = False
 
-        while i > 0 and trouve==False:
+        habitants = int(row[2])
 
-            if(int(row[2])>=tabListPop[i]):
+        while i < nbListPop and trouve==False:
+
+            if i == nbListPop - 1 and habitants>=tabListPop[i][0]:
                 trouve = True
                 temp = row[0].split(",")
                 for j in temp:
                     setsPopulation[i].add(j)
 
-            i-=1
-
-        if trouve==False:
-            temp = row[0].split(",")
-            for j in temp:
-                setsPopulation[0].add(j)
+            elif(habitants>=tabListPop[i][0] and habitants<tabListPop[i][1]):
+                trouve = True
+                temp = row[0].split(",")
+                for j in temp:
+                    setsPopulation[i].add(j)
+            i += 1
 
 def toutEmetteurConfondus():
 
     #tableau 2D qui représente chaque génération d'életteurs (2G, 3G, 4G puis 5G)
     tabGeneration = [[0 for compteurPopulation in range(nbListPop)] for generation in range(4)]
 
-    with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
+    with open('../script/tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
         file_readerSup = csv.reader(FileSup, delimiter=';')
         next(file_readerSup)
         for support in file_readerSup:
 
-            if(support[0] in d):
-                tabGen = d[support[0]]
+            if(support[0] in dictionnaireSupport):
+                tabGen = dictionnaireSupport[support[0]]
 
                 i = 0
 
                 trouve = False
 
-                while i < nbListPop - 1 and trouve==False:
+                while i < nbListPop and trouve==False:
 
                     if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
                         trouve = True
@@ -99,12 +121,6 @@ def toutEmetteurConfondus():
 
                     i+=1
 
-                if trouve == False:
-
-                    for generation in range(4):
-                        if(tabGen[generation]):
-                            tabGeneration[generation][nbListPop - 1] += 1
-
 
     data = {
             "2G":tabGeneration[0],
@@ -113,25 +129,38 @@ def toutEmetteurConfondus():
             "5G":tabGeneration[3]
             };
 
+
     index = ["" for i in range(nbListPop)]
 
     for i in range(nbListPop-1):
-        if(tabListPop[i]<1000):
-            index[i] = str(tabListPop[i]/1000)
+        valMin = tabListPop[i][0]/1000
+        valMax = tabListPop[i][1]/1000
+        if(is_integer(valMin)):
+            index[i] = str(int(valMin)) + "-"
         else:
-            index[i] = str(int(tabListPop[i]/1000))
+            index[i] = str(valMin) + "-"
+        if(is_integer(valMax)):
+            index[i] += str(int(valMax))
+        else:
+            index[i] += str(valMax) 
     
-    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
+    if(is_integer(tabListPop[nbListPop-1][0]/1000)):
+        index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-1][0]/1000))
+    else:
+        index[nbListPop-1] = ">="+str(tabListPop[nbListPop-1][0]/1000)
 
     columns = ["2G", "3G", "4G", "5G"]
 
     dataFrame = pd.DataFrame(data=data, index=index, columns=columns);
 
-    dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population")
-    plot.ylabel("Nombre d'émetteurs")
-    plot.xlabel("Nombre d'habitants (en milliers)")
-    plot.tight_layout()
-    plot.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenTous.png')
+    plt.rcParams["figure.figsize"] = figsize
+    dataFrame.plot.bar(stacked=True, rot=0, title=titre)
+    plt.grid(b=True, which='major', axis='both')
+    plt.title(label = titre, fontsize = tailleTitre)
+    plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
+    plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.tight_layout()
+    plt.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenTous.png')
 
 
 def emetteurGenMax():
@@ -139,19 +168,19 @@ def emetteurGenMax():
 
     tabGeneration = [[0 for i in range(nbListPop)] for j in range(4)]
 
-    with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
+    with open('../script/tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
         file_readerSup = csv.reader(FileSup, delimiter=';')
         next(file_readerSup)
         for support in file_readerSup:
 
-            if(support[0] in d):
-                tabGen = d[support[0]]
+            if(support[0] in dictionnaireSupport):
+                tabGen = dictionnaireSupport[support[0]]
 
                 i = 0
 
                 trouve = False
 
-                while i < nbListPop - 1 and trouve==False:
+                while i < nbListPop and trouve==False:
 
                     if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
                         trouve = True
@@ -167,16 +196,6 @@ def emetteurGenMax():
 
                     i+=1
 
-                if trouve == False:
-                    if(tabGen[3]):
-                        tabGeneration[3][nbListPop - 1] += 1
-                    elif(tabGen[2]):
-                        tabGeneration[2][nbListPop - 1] += 1
-                    elif(tabGen[1]):
-                        tabGeneration[1][nbListPop - 1] += 1
-                    elif(tabGen[0]):
-                        tabGeneration[0][nbListPop - 1] += 1
-
 
     data = {
             "2G":tabGeneration[0],
@@ -185,24 +204,37 @@ def emetteurGenMax():
             "5G":tabGeneration[3]
             };
 
+
     index = ["" for i in range(nbListPop)]
 
     for i in range(nbListPop-1):
-        if(tabListPop[i]<1000):
-            index[i] = str(tabListPop[i]/1000)
+        valMin = tabListPop[i][0]/1000
+        valMax = tabListPop[i][1]/1000
+        if(is_integer(valMin)):
+            index[i] = str(int(valMin)) + "-"
         else:
-            index[i] = str(int(tabListPop[i]/1000))
+            index[i] = str(valMin) + "-"
+        if(is_integer(valMax)):
+            index[i] += str(int(valMax))
+        else:
+            index[i] += str(valMax) 
     
-    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
+    if(is_integer(tabListPop[nbListPop-1][0]/1000)):
+        index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-1][0]/1000))
+    else:
+        index[nbListPop-1] = ">="+str(tabListPop[nbListPop-1][0]/1000)
 
     columns = ["2G", "3G", "4G", "5G"]
     dataFrame = pd.DataFrame(data=data, index=index);
 
-    dataFrame.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population")
-    plot.ylabel("Nombre d'émetteurs")
-    plot.xlabel("Nombre d'habitants (en milliers)")
-    plot.tight_layout()
-    plot.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenMax.png')
+    plt.rcParams["figure.figsize"] = figsize
+    dataFrame.plot.bar(stacked=True, rot=0, title=titreMax)
+    plt.grid(b=True, which='major', axis='both')
+    plt.title(label = titreMax, fontsize = tailleTitre)
+    plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
+    plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.tight_layout()
+    plt.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenMax.png')
 
 
 toutEmetteurConfondus()
