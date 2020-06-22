@@ -23,7 +23,7 @@ with open(cStats) as carre_file:
 # Functions
 def genData(detail=10, stat='poptot', threshold=0, max_search_dist=17000):
     """
-    in: detail=échantillon (nombre de barres), 
+    in: detail=échantillon (nombre de barres),
         stat=statistique INSEE à évaluer, 
         threshold=valeur de stat min pour être retenue (si négative, max), 
         tech=technologie de l'antenne
@@ -43,11 +43,11 @@ def genData(detail=10, stat='poptot', threshold=0, max_search_dist=17000):
     bar = IncrementalBar('Génération des données', max=len(cAll_df))
     for index, row in carres_df.iterrows():
         bar.next()
-        pop = row['poptot'] / 4
         statpc = row[stat]
-        for i in range (1,5): # 4 points du carré
-            dist = int(row['DistSupProchePt'+str(i)]) # distance de l'antenne au point
-            if ((statpc>=threshold and not negative_threshold) or (statpc<=threshold and negative_threshold)):
+        pop = row['poptot'] / 4
+        if ((statpc>=threshold and not negative_threshold) or (statpc<=threshold and negative_threshold)):
+            for i in range (1,5): # 4 points du carré
+                dist = int(row['DistSupProchePt'+str(i)]) # distance de l'antenne au point
                 if (dist/interval < len(data)):
                     data[math.floor(dist/interval)][1]+=pop
                 else:
@@ -55,7 +55,7 @@ def genData(detail=10, stat='poptot', threshold=0, max_search_dist=17000):
                         data[-1][1]+=pop
                     else:
                         data.append(['Plus de '+str(msd), 0])
-    
+        
     bar.finish()
     return(pd.DataFrame(data, columns=['Distance max (km)','Population'], dtype=float))
 
@@ -65,15 +65,13 @@ def plotchart(df):
     plot.xlabel("Distance au support le plus proche (km)")
     plot.ylabel("Volume total de population")
     plot.show()
-    
 
 # Main
-
 start_time = time.time()
-df = genData(detail=40, stat='poptot', threshold=0, max_search_dist=10000)
+df = genData(detail=100, stat='pcjeunes1525', threshold=0.20, max_search_dist=10000)
 print(df)
-df.to_csv(r'poptot.csv', sep='\t', encoding='utf-16', index=False)
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
-#plotchart(df)
+df.to_csv(r'pcjeunes1525coefficienté_15pc100m.csv', sep='\t', encoding='utf-16', index=False)
+plotchart(df)
 
 # distribution: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.hist.html

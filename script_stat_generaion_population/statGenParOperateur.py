@@ -9,28 +9,13 @@ import os
 
 start_time = time.time()
 
-listInf05M = set() #len = 18 403
+#represente les tranches de population, la premier est entre 0 et tabListPop[0], puis tabListPop[0] et tabListPop[1] etc
+#[50, 100, 250, 500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
+tabListPop = [500, 1000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000, 140000, 200000, 400000]
 
-listInf1M = set() #len = 6 672
+nbListPop = len(tabListPop) + 1
 
-listInf5M = set() #len = 7 713
-
-listInf10M = set() #len = 1 181
-
-listInf20M = set() #len = 524
-
-listInf40M = set() #len = 278
-
-listInf60M =set() #len = 93
-
-listInf80M = set() #len = 34
-
-listInf100M = set() #len = 17
-
-listInf140M = set() #len = 18
-
-listSup140M = set() #len = 24
-
+setsPopulation  = [set() for i in range(nbListPop)]
 
 #fonction qui génère un graph avec plusieur bar entassé
 def plot_clustered_stacked(dfall, labels=None, filename="stat.png", title="Nombre d'émetteurs par génération, population et opérateur",  H="/", **kwargs):
@@ -86,7 +71,7 @@ with open('../tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
     
     #represente pour chaque support les générations des emetteur présent et les fournissuers qui les proposent
     #l'ordre est le suivant 2G, 3G, 4G, 5G pour Free puis pour SFR, Orange et Bouygues
-    tabGenFournisseur = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    tabEmetGenOper = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 
     for emetteur in file_readerEme:
 
@@ -104,94 +89,52 @@ with open('../tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
             i = 3
 
         if("GSM" in emetteur[3]):
-            tabGenFournisseur[i*4] = True
+            tabEmetGenOper[i*4] = True
         elif("UMTS" in emetteur[3]):
-            tabGenFournisseur[i*4+1] = True
+            tabEmetGenOper[i*4+1] = True
         elif("LTE" in emetteur[3]):
-            tabGenFournisseur[i*4+2] = True
+            tabEmetGenOper[i*4+2] = True
         elif("NG" in emetteur[3]):
-            tabGenFournisseur[i*4+3] = True
+            tabEmetGenOper[i*4+3] = True
 
         if(numSup in d):
             
-            oldtabGenFournisseur = d[numSup]
+            oldtabEmetGenOper = d[numSup]
             for i in range(16):
-                if(tabGenFournisseur[i]==True or oldtabGenFournisseur[i]==True):
-                    tabGenFournisseur[i] = True
+                if(tabEmetGenOper[i]==True or oldtabEmetGenOper[i]==True):
+                    tabEmetGenOper[i] = True
         
-        d[numSup] = tabGenFournisseur
-        tabGenFournisseur = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+        d[numSup] = tabEmetGenOper
+        tabEmetGenOper = [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 
 with open('../tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File: 
     file_reader = csv.reader(File, delimiter=';')
     next(file_reader)
     for row in file_reader:
-        if(int(row[2])>140000):
+
+        i = nbListPop - 2
+
+        trouve = False
+
+        while i > 0 and trouve==False:
+
+            if(int(row[2])>=tabListPop[i]):
+                trouve = True
+                temp = row[0].split(",")
+                for j in temp:
+                    setsPopulation[i].add(j)
+
+            i-=1
+
+        if trouve==False:
             temp = row[0].split(",")
-            for i in temp:
-                listSup140M.add(i)
-        elif(int(row[2])>100000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf140M.add(i)
-        elif(int(row[2])>80000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf100M.add(i)
-        elif(int(row[2])>60000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf80M.add(i)
-        elif(int(row[2])>40000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf60M.add(i)
-        elif(int(row[2])>20000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf40M.add(i)
-        elif(int(row[2])>10000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf20M.add(i)
-        elif(int(row[2])>5000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf10M.add(i)
-        elif(int(row[2])>1000):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf5M.add(i)
-        elif(int(row[2])>500):
-            temp = row[0].split(",")
-            for i in temp:
-                listInf1M.add(i)
-        else:
-            temp = row[0].split(",")
-            for i in temp:
-                listInf05M.add(i)
+            for j in temp:
+                setsPopulation[0].add(j)
 
 def toutEmetteurConfondus():
 
-    gen2GFree = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GFree = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GFree = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GFree = [0,0,0,0,0,0,0,0,0,0,0]
-
-    gen2GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-
-    gen2GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-
-    gen2GOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GOrange = [0,0,0,0,0,0,0,0,0,0,0]
+    #tableau qui contient pour les opérateurs (Free, SFR, Orange puis Bouygues) un tableau par génération (2,3,4 puis 5G) de compteur de population dans la liste tabListPop
+    tabGenerationOperateur = [[[0 for compteurPopulation in range(nbListPop)] for generation in range(4)] for operateur in range(4)]
 
     with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
         file_readerSup = csv.reader(FileSup, delimiter=';')
@@ -201,641 +144,96 @@ def toutEmetteurConfondus():
 
             #on regarde si le support est présent dans le dictionnaire
             if(support[0] in d):
-                tabGenFournisseur = d[support[0]]
-                
-                #on regarde si le support à moins de 0.5 mille habitants
-                if(listInf05M.__contains__(support[5].replace("'", ""))):
-
-                    #on Comptabilise chaque generation d'emetteur pour Free
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[0]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[0]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[0]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[0]+=1
-
-                    #on comptabilise chaque generation d'emetteur pour SFR
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[0]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[0]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[0]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[0]+=1
-
-                    #on comptabilise chaque generation d'emetteur pour Orange
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[0]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[0]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[0]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[0]+=1
-
-                    #on comptabilise chaque generation d'emetteur pour Bouygues
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[0]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[0]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[0]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[0]+=1
-
-                #si le support à plus d'habitants qui lui sont liés on comptabilise de la même manière
-                elif(listInf1M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[1]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[1]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[1]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[1]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[1]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[1]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[1]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[1]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[1]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[1]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[1]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[1]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[1]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[1]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[1]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[1]+=1
-
-                elif(listInf5M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[2]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[2]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[2]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[2]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[2]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[2]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[2]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[2]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[2]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[2]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[2]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[2]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[2]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[2]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[2]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[2]+=1
-
-                elif(listInf10M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[3]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[3]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[3]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[3]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[3]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[3]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[3]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[3]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[3]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[3]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[3]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[3]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[3]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[3]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[3]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[3]+=1
-
-                elif(listInf20M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[4]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[4]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[4]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[4]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[4]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[4]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[4]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[4]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[4]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[4]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[4]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[4]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[4]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[4]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[4]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[4]+=1
-
-                elif(listInf40M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[5]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[5]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[5]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[5]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[5]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[5]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[5]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[5]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[5]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[5]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[5]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[5]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[5]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[5]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[5]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[5]+=1
-
-                elif(listInf60M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[6]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[6]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[6]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[6]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[6]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[6]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[6]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[6]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[6]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[6]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[6]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[6]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[6]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[6]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[6]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[6]+=1
-
-                elif(listInf80M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[7]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[7]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[7]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[7]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[7]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[7]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[7]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[7]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[7]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[7]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[7]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[7]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[7]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[7]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[7]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[7]+=1
-
-                elif(listInf100M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[8]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[8]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[8]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[8]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[8]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[8]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[8]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[8]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[8]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[8]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[8]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[8]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[8]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[8]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[8]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[8]+=1
-
-                elif(listInf140M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[9]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[9]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[9]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[9]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[9]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[9]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[9]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[9]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[9]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[9]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[9]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[9]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[9]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[9]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[9]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[9]+=1
-
-                elif(listSup140M.__contains__(support[5].replace("'", ""))):
-       
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[10]+=1
-
-                    if(tabGenFournisseur[2]):
-                        gen4GFree[10]+=1
-
-                    if(tabGenFournisseur[1]):
-                        gen3GFree[10]+=1
-
-                    if(tabGenFournisseur[0]):
-                        gen2GFree[10]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[10]+=1
-
-                    if(tabGenFournisseur[6]):
-                        gen4GSFR[10]+=1
-
-                    if(tabGenFournisseur[5]):
-                        gen3GSFR[10]+=1
-
-                    if(tabGenFournisseur[4]):
-                        gen2GSFR[10]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[10]+=1
-
-                    if(tabGenFournisseur[10]):
-                        gen4GOrange[10]+=1
-
-                    if(tabGenFournisseur[9]):
-                        gen3GOrange[10]+=1
-
-                    if(tabGenFournisseur[8]):
-                        gen2GOrange[10]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[10]+=1
-
-                    if(tabGenFournisseur[14]):
-                        gen4GBouygues[10]+=1
-
-                    if(tabGenFournisseur[13]):
-                        gen3GBouygues[10]+=1
-
-                    if(tabGenFournisseur[12]):
-                        gen2GBouygues[10]+=1
+                tabEmetGenOper = d[support[0]]
+
+                i = 0
+
+                trouve = False
+
+                while i < nbListPop - 1 and trouve==False:
+
+                    if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
+                        trouve = True
+
+                        for operateur in range(4):
+                            if(tabEmetGenOper[operateur*4]):
+                                tabGenerationOperateur[operateur][0][i]+=1
+                            if(tabEmetGenOper[operateur*4 + 1]):
+                                tabGenerationOperateur[operateur][1][i]+=1
+                            if(tabEmetGenOper[operateur*4 + 2]):
+                                tabGenerationOperateur[operateur][2][i]+=1
+                            if(tabEmetGenOper[operateur*4 + 3]):
+                                tabGenerationOperateur[operateur][3][i]+=1
+
+                    i+=1
+
+                if trouve == False:
+                    for operateur in range(4):
+                        if(tabEmetGenOper[operateur*4]):
+                            tabGenerationOperateur[operateur][0][nbListPop - 1]+=1
+                        if(tabEmetGenOper[operateur*4 + 1]):
+                            tabGenerationOperateur[operateur][1][nbListPop - 1]+=1
+                        if(tabEmetGenOper[operateur*4 + 2]):
+                            tabGenerationOperateur[operateur][2][nbListPop - 1]+=1
+                        if(tabEmetGenOper[operateur*4 + 3]):
+                            tabGenerationOperateur[operateur][3][nbListPop - 1]+=1
 
 
     dataFree = {
-            "2G":gen2GFree,
-            "3G":gen3GFree,
-            "4G":gen4GFree,
-            "5G":gen5GFree
+            "2G":tabGenerationOperateur[0][0],
+            "3G":tabGenerationOperateur[0][1],
+            "4G":tabGenerationOperateur[0][2],
+            "5G":tabGenerationOperateur[0][3]
             };
 
     dataSFR = {
-            "2G":gen2GSFR,
-            "3G":gen3GSFR,
-            "4G":gen4GSFR,
-            "5G":gen5GSFR
+            "2G":tabGenerationOperateur[1][0],
+            "3G":tabGenerationOperateur[1][1],
+            "4G":tabGenerationOperateur[1][2],
+            "5G":tabGenerationOperateur[1][3]
             };
 
     dataOrange = {
-            "2G":gen2GOrange,
-            "3G":gen3GOrange,
-            "4G":gen4GOrange,
-            "5G":gen5GOrange
+            "2G":tabGenerationOperateur[2][0],
+            "3G":tabGenerationOperateur[2][1],
+            "4G":tabGenerationOperateur[2][2],
+            "5G":tabGenerationOperateur[2][3]
             };
 
     dataBouygues = {
-            "2G":gen2GBouygues,
-            "3G":gen3GBouygues,
-            "4G":gen4GBouygues,
-            "5G":gen5GBouygues
+            "2G":tabGenerationOperateur[3][0],
+            "3G":tabGenerationOperateur[3][1],
+            "4G":tabGenerationOperateur[3][2],
+            "5G":tabGenerationOperateur[3][3]
             };
 
-    index = ["0-0.5", "0.5-1", "1-5", "5-10", "10-20", "20-40", "40-60", "60-80", "80-100", "100-140", ">140"]
+    index = ["" for i in range(nbListPop)]
+
+    for i in range(nbListPop-1):
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
+    
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
+
     columns = ["2G", "3G", "4G", "5G"]
 
-    tabNbEmeFree = [0,0,0,0,0,0,0,0,0,0,0]
-    tabNbEmeOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    tabNbEmeSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    tabNbEmeBouygues = [0,0,0,0,0,0,0,0,0,0,0]
+    tabNbEmeFree = [0 for i in range(nbListPop)]
+    tabNbEmeSFR = [0 for i in range(nbListPop)]
+    tabNbEmeOrange = [0 for i in range(nbListPop)]
+    tabNbEmeBouygues = [0 for i in range(nbListPop)]
 
-    for i in range(len(gen2GFree)):
-        tabNbEmeFree[i]= gen2GFree[i] + gen3GFree[i] + gen4GFree[i] + gen5GFree[i]
-        tabNbEmeOrange[i]= gen2GOrange[i] + gen3GOrange[i] + gen4GOrange[i] + gen5GOrange[i]
-        tabNbEmeSFR[i]= gen2GSFR[i] + gen3GSFR[i] + gen4GSFR[i] + gen5GSFR[i]
-        tabNbEmeBouygues[i]= gen2GBouygues[i] + gen3GBouygues[i] + gen4GBouygues[i] + gen5GBouygues[i]
+    for i in range(nbListPop):
+        tabNbEmeFree[i]= tabGenerationOperateur[0][0][i] + tabGenerationOperateur[0][1][i] + tabGenerationOperateur[0][2][i] + tabGenerationOperateur[0][3][i]
+        tabNbEmeSFR[i]= tabGenerationOperateur[1][0][i] + tabGenerationOperateur[1][1][i] + tabGenerationOperateur[1][2][i] + tabGenerationOperateur[1][3][i]
+        tabNbEmeOrange[i]= tabGenerationOperateur[2][0][i] + tabGenerationOperateur[2][1][i] + tabGenerationOperateur[2][2][i] + tabGenerationOperateur[2][3][i]
+        tabNbEmeBouygues[i]= tabGenerationOperateur[3][0][i] + tabGenerationOperateur[3][1][i] + tabGenerationOperateur[3][2][i] + tabGenerationOperateur[3][3][i]
 
-    maxB = max(tabNbEmeBouygues)
     maxF = max(tabNbEmeFree)
     maxS = max(tabNbEmeSFR)
     maxO = max(tabNbEmeOrange)
+    maxB = max(tabNbEmeBouygues)
 
     maxi = max([maxB, maxF, maxS, maxO])
 
@@ -846,7 +244,7 @@ def toutEmetteurConfondus():
 
     #sauvegarde de tous les graphiques en proportion de leur ordonné maximum
     dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Free Mobile")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousFree.png')
@@ -854,15 +252,15 @@ def toutEmetteurConfondus():
 
 
     dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de SFR")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Telecom")
-    plot.ylabel("Nombre de supports")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Télécom")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousBouygues.png')
@@ -870,7 +268,7 @@ def toutEmetteurConfondus():
 
 
     dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population d'Orange")
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousOrange.png')
@@ -880,7 +278,7 @@ def toutEmetteurConfondus():
     #sauvegarde de tout les graphiques en fonction de l'ordonné maximale de tout les graphes
     dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Free Mobile")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousFree.png')
@@ -889,16 +287,16 @@ def toutEmetteurConfondus():
 
     dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de SFR")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Telecom")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population de Bouygues Télécom")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousBouygues.png')
@@ -907,36 +305,19 @@ def toutEmetteurConfondus():
 
     dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération et population d'Orange")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousOrange.png')
     plot.clf()
 
-    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Telecom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurTous.png')
+    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurTous.png', "Nombre d'émetteurs par génération, population et opérateur")
 
 
 def emetteurGenMax():
 
-    gen2GFree = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GFree = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GFree = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GFree = [0,0,0,0,0,0,0,0,0,0,0]
-
-    gen2GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GSFR = [0,0,0,0,0,0,0,0,0,0,0]
-
-    gen2GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GBouygues = [0,0,0,0,0,0,0,0,0,0,0]
-
-    gen2GOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    gen3GOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    gen4GOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    gen5GOrange = [0,0,0,0,0,0,0,0,0,0,0]
+    #tableau qui contient pour les opérateurs (Free, SFR, Orange puis Bouygues) un tableau par génération (2,3,4 puis 5G) de compteur de population dans la liste tabListPop
+    tabGenerationOperateur = [[[0 for compteurPopulation in range(nbListPop)] for generation in range(4)] for operateur in range(4)]
 
     with open('../tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup: 
         file_readerSup = csv.reader(FileSup, delimiter=';')
@@ -946,641 +327,96 @@ def emetteurGenMax():
 
             #on regarde si le support est présent dans le dictionnaire
             if(support[0] in d):
-                tabGenFournisseur = d[support[0]]
+                tabEmetGenOper = d[support[0]]
                 
-                #on regarde si le support à moins de 0.5 mille habitants
-                if(listInf05M.__contains__(support[5].replace("'", ""))):
-
-                    #on Comptabilise chaque generation d'emetteur pour Free
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[0]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[0]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[0]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[0]+=1
-
-                    #on comptabilise chaque generation d'emetteur pour SFR
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[0]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[0]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[0]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[0]+=1
-
-                    #on comptabilise chaque generation d'emetteur pour Orange
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[0]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[0]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[0]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[0]+=1
-
-                    #on comptabilise chaque generation d'emetteur pour Bouygues
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[0]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[0]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[0]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[0]+=1
-
-                #si le support à plus d'habitants qui lui sont liés on comptabilise de la même manière
-                elif(listInf1M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[1]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[1]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[1]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[1]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[1]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[1]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[1]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[1]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[1]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[1]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[1]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[1]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[1]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[1]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[1]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[1]+=1
-
-                elif(listInf5M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[2]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[2]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[2]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[2]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[2]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[2]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[2]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[2]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[2]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[2]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[2]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[2]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[2]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[2]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[2]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[2]+=1
-
-                elif(listInf10M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[3]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[3]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[3]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[3]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[3]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[3]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[3]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[3]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[3]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[3]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[3]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[3]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[3]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[3]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[3]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[3]+=1
-
-                elif(listInf20M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[4]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[4]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[4]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[4]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[4]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[4]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[4]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[4]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[4]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[4]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[4]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[4]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[4]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[4]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[4]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[4]+=1
-
-                elif(listInf40M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[5]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[5]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[5]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[5]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[5]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[5]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[5]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[5]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[5]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[5]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[5]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[5]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[5]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[5]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[5]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[5]+=1
-
-                elif(listInf60M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[6]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[6]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[6]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[6]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[6]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[6]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[6]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[6]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[6]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[6]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[6]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[6]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[6]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[6]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[6]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[6]+=1
-
-                elif(listInf80M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[7]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[7]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[7]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[7]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[7]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[7]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[7]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[7]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[7]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[7]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[7]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[7]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[7]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[7]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[7]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[7]+=1
-
-                elif(listInf100M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[8]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[8]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[8]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[8]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[8]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[8]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[8]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[8]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[8]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[8]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[8]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[8]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[8]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[8]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[8]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[8]+=1
-
-                elif(listInf140M.__contains__(support[5].replace("'", ""))):
-
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[9]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[9]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[9]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[9]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[9]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[9]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[9]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[9]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[9]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[9]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[9]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[9]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[9]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[9]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[9]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[9]+=1
-
-                elif(listSup140M.__contains__(support[5].replace("'", ""))):
-       
-                    if(tabGenFournisseur[3]):
-                        gen5GFree[10]+=1
-
-                    elif(tabGenFournisseur[2]):
-                        gen4GFree[10]+=1
-
-                    elif(tabGenFournisseur[1]):
-                        gen3GFree[10]+=1
-
-                    elif(tabGenFournisseur[0]):
-                        gen2GFree[10]+=1
-
-                    
-                    if(tabGenFournisseur[7]):
-                        gen5GSFR[10]+=1
-
-                    elif(tabGenFournisseur[6]):
-                        gen4GSFR[10]+=1
-
-                    elif(tabGenFournisseur[5]):
-                        gen3GSFR[10]+=1
-
-                    elif(tabGenFournisseur[4]):
-                        gen2GSFR[10]+=1
-
-
-                    if(tabGenFournisseur[11]):
-                        gen5GOrange[10]+=1
-
-                    elif(tabGenFournisseur[10]):
-                        gen4GOrange[10]+=1
-
-                    elif(tabGenFournisseur[9]):
-                        gen3GOrange[10]+=1
-
-                    elif(tabGenFournisseur[8]):
-                        gen2GOrange[10]+=1
-
-
-                    if(tabGenFournisseur[15]):
-                        gen5GBouygues[10]+=1
-
-                    elif(tabGenFournisseur[14]):
-                        gen4GBouygues[10]+=1
-
-                    elif(tabGenFournisseur[13]):
-                        gen3GBouygues[10]+=1
-
-                    elif(tabGenFournisseur[12]):
-                        gen2GBouygues[10]+=1
+                i = 0
+
+                trouve = False
+
+                while i < nbListPop - 1 and trouve==False:
+
+                    if(setsPopulation[i].__contains__(support[5].replace("'", ""))):
+                        trouve = True
+
+                        for operateur in range(4):
+                            if(tabEmetGenOper[operateur*4 + 3]):
+                                tabGenerationOperateur[operateur][3][i]+=1
+                            elif(tabEmetGenOper[operateur*4 + 2]):
+                                tabGenerationOperateur[operateur][2][i]+=1
+                            elif(tabEmetGenOper[operateur*4 + 1]):
+                                tabGenerationOperateur[operateur][1][i]+=1
+                            elif(tabEmetGenOper[operateur*4]):
+                                tabGenerationOperateur[operateur][0][i]+=1
+
+                    i+=1
+
+                if trouve == False:
+                    for operateur in range(4):
+                        if(tabEmetGenOper[operateur*4 + 3]):
+                            tabGenerationOperateur[operateur][3][nbListPop - 1]+=1
+                        elif(tabEmetGenOper[operateur*4 + 2]):
+                            tabGenerationOperateur[operateur][2][nbListPop - 1]+=1
+                        elif(tabEmetGenOper[operateur*4 + 1]):
+                            tabGenerationOperateur[operateur][1][nbListPop - 1]+=1
+                        elif(tabEmetGenOper[operateur*4]):
+                            tabGenerationOperateur[operateur][0][nbListPop - 1]+=1
 
 
     dataFree = {
-            "2G":gen2GFree,
-            "3G":gen3GFree,
-            "4G":gen4GFree,
-            "5G":gen5GFree
+            "2G":tabGenerationOperateur[0][0],
+            "3G":tabGenerationOperateur[0][1],
+            "4G":tabGenerationOperateur[0][2],
+            "5G":tabGenerationOperateur[0][3]
             };
 
     dataSFR = {
-            "2G":gen2GSFR,
-            "3G":gen3GSFR,
-            "4G":gen4GSFR,
-            "5G":gen5GSFR
+            "2G":tabGenerationOperateur[1][0],
+            "3G":tabGenerationOperateur[1][1],
+            "4G":tabGenerationOperateur[1][2],
+            "5G":tabGenerationOperateur[1][3]
             };
 
     dataOrange = {
-            "2G":gen2GOrange,
-            "3G":gen3GOrange,
-            "4G":gen4GOrange,
-            "5G":gen5GOrange
+            "2G":tabGenerationOperateur[2][0],
+            "3G":tabGenerationOperateur[2][1],
+            "4G":tabGenerationOperateur[2][2],
+            "5G":tabGenerationOperateur[2][3]
             };
 
     dataBouygues = {
-            "2G":gen2GBouygues,
-            "3G":gen3GBouygues,
-            "4G":gen4GBouygues,
-            "5G":gen5GBouygues
+            "2G":tabGenerationOperateur[3][0],
+            "3G":tabGenerationOperateur[3][1],
+            "4G":tabGenerationOperateur[3][2],
+            "5G":tabGenerationOperateur[3][3]
             };
 
-    index = ["0-0.5", "0.5-1", "1-5", "5-10", "10-20", "20-40", "40-60", "60-80", "80-100", "100-140", ">140"]
+    index = ["" for i in range(nbListPop)]
+
+    for i in range(nbListPop-1):
+        if(tabListPop[i]<1000):
+            index[i] = str(tabListPop[i]/1000)
+        else:
+            index[i] = str(int(tabListPop[i]/1000))
+    
+    index[nbListPop-1] = ">="+str(int(tabListPop[nbListPop-2]/1000))
+
     columns = ["2G", "3G", "4G", "5G"]
 
-    tabNbEmeFree = [0,0,0,0,0,0,0,0,0,0,0]
-    tabNbEmeOrange = [0,0,0,0,0,0,0,0,0,0,0]
-    tabNbEmeSFR = [0,0,0,0,0,0,0,0,0,0,0]
-    tabNbEmeBouygues = [0,0,0,0,0,0,0,0,0,0,0]
+    tabNbEmeFree = [0 for i in range(nbListPop)]
+    tabNbEmeSFR = [0 for i in range(nbListPop)]
+    tabNbEmeOrange = [0 for i in range(nbListPop)]
+    tabNbEmeBouygues = [0 for i in range(nbListPop)]
 
-    for i in range(len(gen2GFree)):
-        tabNbEmeFree[i]= gen2GFree[i] + gen3GFree[i] + gen4GFree[i] + gen5GFree[i]
-        tabNbEmeOrange[i]= gen2GOrange[i] + gen3GOrange[i] + gen4GOrange[i] + gen5GOrange[i]
-        tabNbEmeSFR[i]= gen2GSFR[i] + gen3GSFR[i] + gen4GSFR[i] + gen5GSFR[i]
-        tabNbEmeBouygues[i]= gen2GBouygues[i] + gen3GBouygues[i] + gen4GBouygues[i] + gen5GBouygues[i]
+    for i in range(nbListPop):
+        tabNbEmeFree[i]= tabGenerationOperateur[0][0][i] + tabGenerationOperateur[0][1][i] + tabGenerationOperateur[0][2][i] + tabGenerationOperateur[0][3][i]
+        tabNbEmeSFR[i]= tabGenerationOperateur[1][0][i] + tabGenerationOperateur[1][1][i] + tabGenerationOperateur[1][2][i] + tabGenerationOperateur[1][3][i]
+        tabNbEmeOrange[i]= tabGenerationOperateur[2][0][i] + tabGenerationOperateur[2][1][i] + tabGenerationOperateur[2][2][i] + tabGenerationOperateur[2][3][i]
+        tabNbEmeBouygues[i]= tabGenerationOperateur[3][0][i] + tabGenerationOperateur[3][1][i] + tabGenerationOperateur[3][2][i] + tabGenerationOperateur[3][3][i]
 
-    maxB = max(tabNbEmeBouygues)
     maxF = max(tabNbEmeFree)
     maxS = max(tabNbEmeSFR)
     maxO = max(tabNbEmeOrange)
+    maxB = max(tabNbEmeBouygues)
 
     maxi = max([maxB, maxF, maxS, maxO])
 
@@ -1590,32 +426,32 @@ def emetteurGenMax():
     dfBouygues = pd.DataFrame(data=dataBouygues, index=index, columns=columns);
 
     #sauvegarde de tous les graphiques en proportion de leur ordonné maximum
-    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Free Mobile")
-    plot.ylabel("Nombre de supports")
+    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Free Mobile")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxFree.png')
     plot.clf()
 
 
-    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de SFR")
-    plot.ylabel("Nombre de supports")
+    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de SFR")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Bouygues Telecom")
-    plot.ylabel("Nombre de supports")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Bouygues Télécom")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxBouygues.png')
     plot.clf()
 
 
-    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population d'Orange")
-    plot.ylabel("Nombre de supports")
+    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population d'Orange")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxOrange.png')
@@ -1623,42 +459,42 @@ def emetteurGenMax():
 
 
     #sauvegarde de tout les graphiques en fonction de l'ordonné maximale de tout les graphes
-    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Free Mobile")
+    dfFree.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Free Mobile")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxFree.png')
     plot.clf()
 
 
-    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de SFR")
+    dfSFR.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de SFR")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxSFR.png')
     plot.clf()
 
 
-    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population de Bouygues Telecom")
+    dfBouygues.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population de Bouygues Télécom")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxBouygues.png')
     plot.clf()
 
 
-    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs par génération max/support et population d'Orange")
+    dfOrange.plot.bar(stacked=True, rot=25, title="Nombre d'émetteurs de génération max par population d'Orange")
     plot.ylim([0, math.ceil(maxi+0.1*(maxi-0))])
-    plot.ylabel("Nombre de supports")
+    plot.ylabel("Nombre d'émetteurs")
     plot.xlabel("Nombre d'habitants (en milliers)")
     plot.tight_layout()
     plot.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxOrange.png')
     plot.clf()
 
-    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Telecom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurGenMax.png', "Nombre d'émetteurs par génération max/support, population et operateur")
+    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurGenMax.png', "Nombre d'émetteurs de génération max par population et opérateur")
 
 toutEmetteurConfondus()
 emetteurGenMax()

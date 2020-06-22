@@ -14,3 +14,6 @@ if not os.path.exists('../statistiques/emetteur_population_support/StatParOperat
 
 if not os.path.exists('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne'):
 	os.mkdir('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne')
+
+if not os.path.exists('../statistiques/emetteur_population_support/StatParAnnee'):
+	os.mkdir('../statistiques/emetteur_population_support/StatParAnnee')
