@@ -72,7 +72,6 @@ label_point(dataFrame.numpop, dataFrame.support, dataFrame.label, ax)
 print("okau")
 plot.savefig('tables/newstatpop.png')
 print("fin")
-print(tab["75008"])
-print(division["75008"])
+
 plot.show()
 
