@@ -7,10 +7,11 @@ import numpy as np
 start_time = time.time()
 
 #represente les tranches de population
-tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
-tabAnnee = [[2011], [2011, 2014], [2014, 2017], [2017]]
-#correspond à la 4G dans la table EMETTEUR.csv
+tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [80000, 100000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
+tabAnnee = [[2011, 2014], [2014, 2017], [2017]]
+tabCouleur = ["yellow", "orange", "red"]
 
+#correspond à la 4G dans la table EMETTEUR.csv
 generation = "LTE"
 
 figsizeNombres = (13, 10)
@@ -136,13 +137,13 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 
 				while i < nbAnnee and trouveIndiceAnnee==False:
 
-					if(i == 0 and annee < tabAnnee[i][0]):
+					if(i == 0 and len(tabAnnee[i])==1 and annee < tabAnnee[i][0]):
 						trouveIndiceAnnee = True
 						indiceAnnee = i
-					if(i == nbAnnee-1 and annee > tabAnnee[i][0]):
+					if(i == nbAnnee-1 and len(tabAnnee[i])==1 and annee >= tabAnnee[i][0]):
 						trouveIndiceAnnee = True
 						indiceAnnee = i
-					if(i != 0 and i != nbAnnee-1 and annee >= tabAnnee[i][0] and annee <= tabAnnee[i][1]):
+					if(len(tabAnnee[i])==2 and annee >= tabAnnee[i][0] and annee < tabAnnee[i][1]):
 						trouveIndiceAnnee = True
 						indiceAnnee = i
 
@@ -170,8 +171,14 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 	for i in range(1, nbAnnee - 1):
 		columns[i] = str(tabAnnee[i][0]) +"-"+ str(tabAnnee[i][1])
 
-	columns[0] = "<"+str(tabAnnee[0][0])
-	columns[nbAnnee-1] = ">"+str(tabAnnee[nbAnnee-1][0])
+	if(len(tabAnnee[0]) == 1):
+		columns[0] = "<"+str(tabAnnee[0][0])
+	else:
+		columns[0] = str(tabAnnee[0][0]) +"-"+ str(tabAnnee[0][1])
+	if(len(tabAnnee[nbAnnee-1]) == 1):
+		columns[nbAnnee-1] = ">"+str(tabAnnee[nbAnnee-1][0])
+	else:
+		columns[nbAnnee-1] = str(tabAnnee[nbAnnee-1][0]) +"-"+ str(tabAnnee[nbAnnee-1][1])
 
 	index = ["" for i in range(nbListPop)]
 
@@ -213,7 +220,7 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 
 	maxSize += maxSize*0.02
 
-	bar_plot(ax, data, total_width=1, single_width=0.9)
+	bar_plot(ax, data, colors = tabCouleur, total_width=1, single_width=0.9)
 
 	ax.set_ylabel(texteOrdonneeGlobal, fontsize = tailleOrdonnee)
 	ax.set_xlabel(texteAbscisseGlobal, fontsize = tailleAbscisse)
@@ -223,7 +230,6 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 	ax.set_xticklabels(index)
 
 	fig.tight_layout()
-
 	plt.savefig('../statistiques/emetteur_population_support/StatParAnnee/statAnneeGlobal.png')
 
 	plt.clf()
@@ -257,7 +263,7 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 
 	maxPourcent += maxPourcent*0.02
 
-	bar_plot(ax, dataPourcent, total_width=1, single_width=0.9)
+	bar_plot(ax, dataPourcent, colors = tabCouleur, total_width=1, single_width=0.9)
 
 	ax.set_ylabel(texteOrdonneePourcentage, fontsize = tailleOrdonnee)
 	ax.set_xlabel(texteAbscissePourcentage, fontsize = tailleAbscisse)
@@ -265,7 +271,6 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 	ax.set_xticks(ind)
 	ax.set_yticks(np.arange(0, maxPourcent, 2.0))
 	ax.set_xticklabels(index)
-
 	plt.savefig('../statistiques/emetteur_population_support/StatParAnnee/statAnneeGlobalPourcentage.png')
     
 print("Temps d execution total: %s secondes ---" % (time.time() - start_time))
