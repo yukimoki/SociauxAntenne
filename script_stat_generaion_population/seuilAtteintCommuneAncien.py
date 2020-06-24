@@ -9,6 +9,8 @@ start_time = time.time()
 
 #correspond à la 4G dans la table EMETTEUR.csv
 generation = "LTE"
+#seuil en pourcentage
+seuil = 50
 
 figsize = (12, 10)
 titre  = "Pourcentage d'émetteurs mis en service par commune et année"
@@ -26,7 +28,7 @@ codePostauxCommunes = [[] for i in range(len(nomsCommunes))]
 linestyles = ["-", "--", "-.", "--"]
 markers = ["o", "o", "o","p"]
 
-texteSauvegarde = "statCommunsEmetAncienrural1.png"
+texteSauvegarde = "statCommunsEmetAncienFABL.png"
 
 nbCommunes = len(nomsCommunes)
 

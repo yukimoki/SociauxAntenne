@@ -8,27 +8,29 @@ start_time = time.time()
 
 #correspond à la 4G dans la table EMETTEUR.csv
 generation = "LTE"
+#seuil en pourcentage
+seuil = 50
 
 figsize = (12, 10)
-titre  = "Pourcentage d'émetteurs mis en service par commune et année"
-tailleTitre = 25
+titre  = "Année où le seuil de " + str(seuil) + "% d'émetteurs à été atteint par commune"
+tailleTitre = 20
 
-axeOrdonnee = "Pourcentage d'émetteurs"
+axeOrdonnee = "Population"
 axeAbscisse = "Année"
 tailleOrdonnee = 15
 tailleAbscisse = 15
 
 tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
 
-nomsCommunes = ["Pont-sur-Seine", "Pommerit-le-Vicomte", "Abeilhan", "Sion-les-Mines", "Clermont-en-Argonne", "Tresserre", "Châtenay-sur-Seine", "Hangest-en-Santerre", "Saint-Cyr-sous-Dourdan", "Valromey-sur-Séran"]
-codePostauxCommunes = [[] for i in range(len(nomsCommunes))]
-linestyles = ["-", "--", "-.", "--", "-", "--", "-.", "--", "-", "--"]
-markers = ["o", "o", "o","p", "o", "o", "o","p", "o", "o"]
+nomsCommunes = ["Pluméliau-Bieuzy", "Ogy-Montoy-Flanville", "Villeneuve-d'Ascq", "Dunkerque", "Campeaux", "La Roche-Neuville", "Vesoul", "Lescuns", "Longueau", "Villiers-sur-Orge", "Saint-Pierre"]
+linestyles = ["-", "--", "-.", "--"]
+markers = ["o", "o", "o","p"]
 
-texteSauvegarde = "statCommunesRural2.png"
+texteSauvegarde = "statSeuilRural2.png"
 
 nbCommunes = len(nomsCommunes)
-
+codePostauxCommunes = [[] for i in range(nbCommunes)]
+popCommune = [0 for i in range(nbCommunes)]
 nbTranches = len(tabAnnee) + 1
 
 #dictionaire dont la clé est l'id du support et la valeur le code postal de la commune dans laquelle il se trouve
@@ -47,6 +49,7 @@ with open('../script/tables/getPopCodePostal.csv', 'r', encoding='UTF-8', newlin
                 stringCodePostal = line[0].split("-")
                 intCP = [int(i) for i in stringCodePostal]
                 codePostauxCommunes[i] = intCP
+                popCommune[i] = int(line[2])
 
 #on récupère tous les supports des communes concernées
 with open('../script/tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as FileSup:
@@ -111,28 +114,80 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
     index[0] = "<"+str(tabAnnee[0])
     index[nbTranches-1] = ">"+str(tabAnnee[len(tabAnnee)-1])
 
-    data = {}
+    #on fait la somme cumulatif puis le pourcentage pour chaque commune
+    for i in  range(nbCommunes):
+        #somme cumulative
+        for j in range(1, nbTranches):
+            tabCommunes[i][j] += tabCommunes[i][j-1]
+
+        #pourcentage
+        for j in range(nbTranches):
+            tabCommunes[i][j] = (tabCommunes[i][j]/tabCommunes[i][nbTranches-1]) * 100
+
+    #tableau qui contient l'indice pour chaque commune où le seuil à été atteint
+    tabAnneSeuil = [0 for i in range(nbCommunes)]
+    tabPourcentSeuil = [0 for i in range(nbCommunes)]
 
     for i in range(nbCommunes):
-        data[nomsCommunes[i]] = tabCommunes[i]
+        temp = tabCommunes[i]
+        indiceSeuilAtteint = 0
+        trouveSeuil = False 
+        j = 0
+        while j < nbTranches and trouveSeuil == False:
+            if(temp[j]>=seuil):
+                indiceSeuilAtteint = j
+                tabPourcentSeuil[i] = temp[j]
+                trouveSeuil = True
+            j += 1
 
-    df = pd.DataFrame(data=data)
+        tabAnneSeuil[i] = indiceSeuilAtteint
+
+    anneeMin = min(tabAnneSeuil)
+    anneeMax = max(tabAnneSeuil)
+
+    anneeCommune = [index[tabAnneSeuil[i]] for i in range(nbCommunes)]
+
+    dataSeuil = {}
+
+
+    rang = 0
+
+    dictAnneeRang = {}
+
+    for i in range(anneeMin, anneeMax+1):
+        dictAnneeRang[index[i]] = rang
+        rang +=1
+
+    rangAnnee = [dictAnneeRang[anneeCommune[i]] for i in range(nbCommunes)]
+
+    dataSeuil["nomCommune"] = nomsCommunes
+    dataSeuil["population"] = popCommune
+    dataSeuil["annee"] = anneeCommune
+    dataSeuil["rangAnnee"] = rangAnnee
+    dataSeuil["pourcentAtteint"] = tabPourcentSeuil
 
     plt.rcParams["figure.figsize"] = figsize
 
-    for i in range(nbCommunes):
-        df[nomsCommunes[i]] = df[nomsCommunes[i]].cumsum()
-        nbEmetCommunes = [df[nomsCommunes[j]][len(df[nomsCommunes[j]]) - 1] for j in range(nbCommunes)]
-        df[nomsCommunes[i]] = (df[nomsCommunes[i]]/nbEmetCommunes[i])*100
-        codePostal = ", " + str(codePostauxCommunes[i][0])[0:2]
-        plt.plot(index, df[nomsCommunes[i]], label = nomsCommunes[i]+ codePostal + ": " + str(nbEmetCommunes[i]), marker = markers[i], linestyle = linestyles[i])
+    df = pd.DataFrame(data=dataSeuil).sort_values(by=["rangAnnee"], ascending=True)
 
+    for index, row in df.iterrows():
+        for i in range(nbCommunes):
+            if(row["nomCommune"]==nomsCommunes[i]):
+                codePostal = ", " + str(codePostauxCommunes[i][0])[0:2]
+                textLabel = nomsCommunes[i]+ codePostal + ": " + str(row["population"])
+        plt.plot(row["annee"], row["population"], 'x-', label = textLabel)
 
     plt.grid(b=True, which='major', axis='both')
     plt.title(titre, fontsize=tailleTitre)
     plt.ylabel(axeOrdonnee, fontsize=tailleOrdonnee)
     plt.xlabel(axeAbscisse, fontsize=tailleAbscisse)
-    plt.yticks(np.arange(0, 101, 5.0))
+
+    def label_point(x, y, val, ax):
+        a = pd.concat({'x': x, 'y': y, 'val': val}, axis=1)
+        for i, point in a.iterrows():
+            ax.text(point['x'], point['y'], str(point['val']))
+
+    label_point(df.annee, df.population, df.nomCommune, plt)
 
     plt.legend()
 
