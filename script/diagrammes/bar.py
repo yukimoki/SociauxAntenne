@@ -5,11 +5,11 @@ import pandas as pd
 import matplotlib.pyplot as plot
 import numpy as np
 import time
-from progress.bar import IncrementalBar
+#from progress.bar import IncrementalBar
 
 # Paths
-cAll = 'data/CarresDistSupProche.csv'
-cStats = 'data/StatsSocioCarres.csv'
+cAll = './CarresDistSupProche.csv'
+cStats = './StatsSocioCarres.csv'
 
 # Files
 print('Ouverture des fichiers...')
@@ -40,11 +40,13 @@ def genData(detail=10, stat='poptot', threshold=0, max_search_dist=17000):
         data.append([round(((i+1)*interval-1)/1000, 2), 0])
     print('Jointure des fichiers...')
     carres_df = cAll_df.join(cStats_df.set_index('LAEA'), on='IDcrs')
-    bar = IncrementalBar('Génération des données', max=len(cAll_df))
+    #bar = IncrementalBar('Génération des données', max=len(cAll_df))
+    nbcarre=0
     for index, row in carres_df.iterrows():
-        bar.next()
+        #bar.next()
         statpc = row[stat]
-        pop = row['poptot'] / 4
+        pop = row['poptot'] / 4 * float(statpc)
+        
         if ((statpc>=threshold and not negative_threshold) or (statpc<=threshold and negative_threshold)):
             for i in range (1,5): # 4 points du carré
                 dist = int(row['DistSupProchePt'+str(i)]) # distance de l'antenne au point
@@ -55,8 +57,10 @@ def genData(detail=10, stat='poptot', threshold=0, max_search_dist=17000):
                         data[-1][1]+=pop
                     else:
                         data.append(['Plus de '+str(msd), 0])
+            nbcarre+=1
         
-    bar.finish()
+    #bar.finish()
+    print(nbcarre)
     return(pd.DataFrame(data, columns=['Distance max (km)','Population'], dtype=float))
 
 def plotchart(df):
@@ -68,10 +72,10 @@ def plotchart(df):
 
 # Main
 start_time = time.time()
-df = genData(detail=100, stat='pcjeunes1525', threshold=0.20, max_search_dist=10000)
+df = genData(detail=100, stat='pcjeunes1525', threshold=-0.08, max_search_dist=10000)
 print(df)
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
-df.to_csv(r'pcjeunes1525coefficienté_15pc100m.csv', sep='\t', encoding='utf-16', index=False)
-plotchart(df)
+df.to_csv(r'pcnonjeunes_15pc100m.csv', sep='\t', encoding='utf-16', index=False)
+#plotchart(df)
 
 # distribution: https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.plot.hist.html

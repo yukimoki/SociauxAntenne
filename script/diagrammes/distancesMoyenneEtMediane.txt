@@ -1,0 +1,2 @@
+distance moyenne = 1314,11976
+distance mediane = 980
