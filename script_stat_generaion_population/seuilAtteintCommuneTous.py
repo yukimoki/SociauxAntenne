@@ -22,11 +22,9 @@ tailleAbscisse = 15
 
 tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
 
-nomsCommunes = ["Pluméliau-Bieuzy", "Ogy-Montoy-Flanville", "Villeneuve-d'Ascq", "Dunkerque", "Campeaux", "La Roche-Neuville", "Vesoul", "Lescuns", "Longueau", "Villiers-sur-Orge", "Saint-Pierre"]
-linestyles = ["-", "--", "-.", "--"]
-markers = ["o", "o", "o","p"]
+nomsCommunes = ['Chancia', 'Riboux', 'Change', 'Aresches', 'Verrie', 'Zermezeele', 'Vernay', 'Xaintray', 'Yrouerre', 'Saint-Élie']
 
-texteSauvegarde = "statSeuilRural2.png"
+texteSauvegarde = "statSeuilCommunesRepresentatives.png"
 
 nbCommunes = len(nomsCommunes)
 codePostauxCommunes = [[] for i in range(nbCommunes)]
@@ -81,35 +79,35 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 
                 annee = int(dateMiseEnService[6:])
 
-                tranche = 0
+                tranche = -1
 
                 i = len(tabAnnee) - 1
 
                 trouve = False
 
-                while i > 0 and trouve==False:
+                while i >= 0 and trouve==False:
 
-                    if(annee > tabAnnee[i]):
+                    if(annee >= tabAnnee[i]):
                         trouve = True
                         tranche = i + 1
 
                     i -= 1
 
-                if trouve == False:
-                    if annee > tabAnnee[0] :
-                        tranche = 1
-                    else:
-                        tranche = 0
+                if trouve == False and annee < tabAnnee[0]:
+                    tranche = 0
 
                 for j in range(nbCommunes):
-                    if codePostalSupport in codePostauxCommunes[j]:
+                    if codePostalSupport in codePostauxCommunes[j] and tranche!=-1:
                         tabCommunes[j][tranche] += 1
 
 
     index = ["" for i in range(nbTranches)]
 
     for i in range(1, len(tabAnnee)):
-        index[i] = str(tabAnnee[i-1]) +"-"+str(tabAnnee[i])
+        if(tabAnnee[i] - tabAnnee[i-1] == 1):
+            index[i] = str(tabAnnee[i-1])
+        else:
+            index[i] = str(tabAnnee[i-1]) +"-"+str(tabAnnee[i])
 
     index[0] = "<"+str(tabAnnee[0])
     index[nbTranches-1] = ">"+str(tabAnnee[len(tabAnnee)-1])

@@ -43,72 +43,72 @@ with open('tables/getPopCodePostal.csv', 'r', encoding='latin-1') as File:
     next(file_reader)
     for row in file_reader:
         if(int(row[2])>400000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[13]+=1
                 listSup400M.add(i)
         elif(int(row[2])>220000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[12]+=1
                 listInf400M.add(i)
         elif(int(row[2])>140000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[11]+=1
                 listInf220M.add(i)
         elif(int(row[2])>120000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[10]+=1
                 listInf140M.add(i)
         elif(int(row[2])>100000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[9]+=1
                 listInf120M.add(i)
         elif(int(row[2])>80000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[8]+=1
                 listInf100M.add(i)
         elif(int(row[2])>60000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[7]+=1
                 listInf80M.add(i)
         elif(int(row[2])>40000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[6]+=1
                 listInf60M.add(i)
         elif(int(row[2])>20000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[5]+=1
                 listInf40M.add(i)
         elif(int(row[2])>10000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[4]+=1
                 listInf20M.add(i)
         elif(int(row[2])>5000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[3]+=1
                 listInf10M.add(i)
         elif(int(row[2])>1000):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[2]+=1
                 listInf5M.add(i)
         elif(int(row[2])>500):
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[1]+=1
                 listInf1M.add(i)
         else:
-            temp = row[0].split(",")
+            temp = row[0].split("-")
             for i in temp:
                 lea[0]+=1
                 listInf05M.add(i)

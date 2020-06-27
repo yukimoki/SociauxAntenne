@@ -10,9 +10,9 @@ import os
 start_time = time.time()
 
 #represente les tranches de population
-tabListPop = [[0, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
+tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
 
-figsize = (12, 8)
+figsize = (12, 10)
 
 tailleTitre = 25
 
@@ -45,7 +45,7 @@ def is_integer(n):
         return float(n).is_integer()
 
 #fonction qui génère un graph avec plusieur bar entassé
-def plot_clustered_stacked(dfall, labels=None, filename="stat.png", title="titre",  H="/", **kwargs):
+def plot_clustered_stacked(dfall, labels=None, filename="stat.png", title="titre",  H="/", maxi = 0, **kwargs):
 
     n_df = len(dfall)
     n_col = len(dfall[0].columns) 
@@ -87,6 +87,8 @@ def plot_clustered_stacked(dfall, labels=None, filename="stat.png", title="titre
     axe.add_artist(l1)
 
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
+    if(maxi != 0):
+        plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
     plt.tight_layout()
     plt.savefig(filename)
@@ -152,13 +154,13 @@ with open('../script/tables/getPopCodePostal.csv', 'r', encoding='latin-1') as F
 
             if i == nbListPop - 1 and habitants>=tabListPop[i][0]:
                 trouve = True
-                temp = row[0].split(",")
+                temp = row[0].split("-")
                 for j in temp:
                     setsPopulation[i].add(j)
 
             elif(habitants>=tabListPop[i][0] and habitants<tabListPop[i][1]):
                 trouve = True
-                temp = row[0].split(",")
+                temp = row[0].split("-")
                 for j in temp:
                     setsPopulation[i].add(j)
             i += 1
@@ -279,6 +281,7 @@ def toutEmetteurConfondus():
     plt.title(label = titreFree, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxF*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousFree.png')
     
@@ -290,6 +293,7 @@ def toutEmetteurConfondus():
     plt.title(label = titreSFR, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxS*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousSFR.png')
     
@@ -300,6 +304,7 @@ def toutEmetteurConfondus():
     plt.title(label = titreBouygues, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxB*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousBouygues.png')
     
@@ -310,6 +315,7 @@ def toutEmetteurConfondus():
     plt.title(label = titreOrange, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxO*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenTousOrange.png')
     
@@ -323,6 +329,7 @@ def toutEmetteurConfondus():
     plt.title(label = titreFree, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousFree.png')
     
@@ -334,6 +341,7 @@ def toutEmetteurConfondus():
     plt.title(label = titreSFR, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousSFR.png')
     
@@ -345,6 +353,7 @@ def toutEmetteurConfondus():
     plt.title(label = titreBouygues, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousBouygues.png')
     
@@ -356,11 +365,12 @@ def toutEmetteurConfondus():
     plt.title(label = titreOrange, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenTousOrange.png')
     
 
-    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], filename = '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurTous.png', title  = titreGraphCommun)
+    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], filename = '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurTous.png', title  = titreGraphCommun, maxi = maxi)
 
 
 def emetteurGenMax():
@@ -479,6 +489,7 @@ def emetteurGenMax():
     plt.title(label = titreFreeMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxF*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxFree.png')
     
@@ -489,6 +500,7 @@ def emetteurGenMax():
     plt.title(label = titreSFRMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxS*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxSFR.png')
     
@@ -499,6 +511,7 @@ def emetteurGenMax():
     plt.title(label = titreBouyguesMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxB*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxBouygues.png')
     
@@ -509,6 +522,7 @@ def emetteurGenMax():
     plt.title(label = titreOrangeMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxO*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateur/statPopGenMaxOrange.png')
     
@@ -522,6 +536,7 @@ def emetteurGenMax():
     plt.title(label = titreFreeMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxFree.png')
     
@@ -533,6 +548,7 @@ def emetteurGenMax():
     plt.title(label = titreSFRMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxSFR.png')
     
@@ -544,6 +560,7 @@ def emetteurGenMax():
     plt.title(label = titreBouyguesMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxBouygues.png')
     
@@ -555,11 +572,12 @@ def emetteurGenMax():
     plt.title(label = titreOrangeMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+    plt.yticks(np.arange(0, maxi*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenMaxOrange.png')
     
 
-    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], filename = '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurGenMax.png', title = titreGraphCommunMax)
+    plot_clustered_stacked([dfFree, dfSFR, dfOrange, dfBouygues],["Free Mobile", "SFR", "Orange", "Bouygues Télécom"], filename = '../statistiques/emetteur_population_support/StatParOperateurMemeOrdonne/statPopGenOperateurGenMax.png', title = titreGraphCommunMax, maxi = maxi)
 
 toutEmetteurConfondus()
 emetteurGenMax()

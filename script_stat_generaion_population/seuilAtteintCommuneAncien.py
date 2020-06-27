@@ -99,35 +99,35 @@ for key in premierEmetteurParSupport:
 
     annee = int(premierEmetteurParSupport[idSup])
 
-    tranche = 0
+    tranche = -1
 
     i = len(tabAnnee) - 1
 
     trouve = False
 
-    while i > 0 and trouve==False:
+    while i >= 0 and trouve==False:
 
-        if(annee > tabAnnee[i]):
+        if(annee >= tabAnnee[i]):
             trouve = True
             tranche = i + 1
 
         i -= 1
 
-    if trouve == False:
-        if annee > tabAnnee[0] :
-            tranche = 1
-        else:
-            tranche = 0
+    if trouve == False and annee < tabAnnee[0]:
+        tranche = 0
 
     for j in range(nbCommunes):
-        if codePostalSupport in codePostauxCommunes[j]:
+        if codePostalSupport in codePostauxCommunes[j] and tranche!=-1:
             tabCommunes[j][tranche] += 1
 
 
 index = ["" for i in range(nbTranchesAnnee)]
 
 for i in range(1, len(tabAnnee)):
-    index[i] = str(tabAnnee[i-1]) +"-"+str(tabAnnee[i])
+    if(tabAnnee[i] - tabAnnee[i-1] == 1):
+        index[i] = str(tabAnnee[i-1])
+    else:
+        index[i] = str(tabAnnee[i-1]) +"-"+str(tabAnnee[i])
 
 index[0] = "<"+str(tabAnnee[0])
 index[nbTranchesAnnee-1] = ">"+str(tabAnnee[len(tabAnnee)-1])

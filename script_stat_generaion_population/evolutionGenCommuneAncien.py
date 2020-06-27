@@ -23,14 +23,15 @@ tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
 
 nomsCommunes = ["Fort-de-France", "Arvieu", "Bozouls", "Les Eyzies"]
 codePostauxCommunes = [[] for i in range(len(nomsCommunes))]
-linestyles = ["-", "--", "-.", "--"]
-markers = ["o", "o", "o","p"]
-
+linestyles = ["-", "--", "-.", "--", "-", "--", "-.", "--", "-", "--"]
+markers = ["o", "o", "o","p", "o", "o", "o","p", "o", "o"]
 texteSauvegarde = "statCommunsEmetAncienrural1.png"
 
 nbCommunes = len(nomsCommunes)
 
 nbTranchesAnnee = len(tabAnnee) + 1
+
+codePostauxCommunesString = [[] for i in range(len(nomsCommunes))]
 
 codePostauxSupportsConcernees = {}
 
@@ -47,6 +48,7 @@ with open('../script/tables/getPopCodePostal.csv', 'r', encoding='UTF-8', newlin
         for i in range(nbCommunes):
             if(nom == nomsCommunes[i]):
                 stringCodePostal = line[0].split("-")
+                codePostauxCommunesString[i] = stringCodePostal
                 intCP = [int(i) for i in stringCodePostal]
                 codePostauxCommunes[i] = intCP
 
@@ -97,35 +99,35 @@ for key in premierEmetteurParSupport:
 
     annee = int(premierEmetteurParSupport[idSup])
 
-    tranche = 0
+    tranche = -1
 
     i = len(tabAnnee) - 1
 
     trouve = False
 
-    while i > 0 and trouve==False:
+    while i >= 0 and trouve==False:
 
-        if(annee > tabAnnee[i]):
+        if(annee >= tabAnnee[i]):
             trouve = True
             tranche = i + 1
 
         i -= 1
 
-    if trouve == False:
-        if annee > tabAnnee[0] :
-            tranche = 1
-        else:
-            tranche = 0
+    if trouve == False and annee < tabAnnee[0]:
+        tranche = 0
 
     for j in range(nbCommunes):
-        if codePostalSupport in codePostauxCommunes[j]:
+        if codePostalSupport in codePostauxCommunes[j] and tranche!=-1:
             tabCommunes[j][tranche] += 1
 
 
 index = ["" for i in range(nbTranchesAnnee)]
 
 for i in range(1, len(tabAnnee)):
-    index[i] = str(tabAnnee[i-1]) +"-"+str(tabAnnee[i])
+    if(tabAnnee[i] - tabAnnee[i-1] == 1):
+        index[i] = str(tabAnnee[i-1])
+    else:
+        index[i] = str(tabAnnee[i-1]) +"-"+str(tabAnnee[i])
 
 index[0] = "<"+str(tabAnnee[0])
 index[nbTranchesAnnee-1] = ">"+str(tabAnnee[len(tabAnnee)-1])
@@ -143,7 +145,7 @@ for i in range(nbCommunes):
     df[nomsCommunes[i]] = df[nomsCommunes[i]].cumsum()
     nbEmetCommunes = [df[nomsCommunes[j]][len(df[nomsCommunes[j]]) - 1] for j in range(nbCommunes)]
     df[nomsCommunes[i]] = (df[nomsCommunes[i]]/nbEmetCommunes[i])*100
-    codePostal = ", " + str(codePostauxCommunes[i][0])[0:2]
+    codePostal = ", " + str(codePostauxCommunesString[i][0])[0:2]
     plt.plot(index, df[nomsCommunes[i]], label = nomsCommunes[i]+ codePostal + ": " + str(nbEmetCommunes[i]), marker = markers[i], linestyle = linestyles[i])
 
 

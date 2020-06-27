@@ -8,7 +8,7 @@ start_time = time.time()
 
 #represente les tranches de population
 tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
-tabAnnee = [[2011, 2014], [2014, 2017], [2017]]
+tabAnnee = [[2011, 2014], [2015, 2017], [2017]]
 tabCouleur = ["yellow", "orange", "red"]
 
 #correspond à la 4G dans la table EMETTEUR.csv
@@ -87,13 +87,13 @@ with open('../script/tables/getPopCodePostal.csv', 'r', encoding='latin-1') as F
 
 			if i == nbListPop - 1 and habitants>=tabListPop[i][0]:
 				trouve = True
-				temp = row[0].split(",")
+				temp = row[0].split("-")
 				for j in temp:
 					setsPopulation[i].add(j)
 
-			elif(habitants>=tabListPop[i][0] and habitants<tabListPop[i][1]):
+			elif(habitants>=tabListPop[i][0] and habitants<=tabListPop[i][1]):
 				trouve = True
-				temp = row[0].split(",")
+				temp = row[0].split("-")
 				for j in temp:
 					setsPopulation[i].add(j)
 			i += 1
@@ -153,10 +153,10 @@ for key in premierEmetteurParSupport:
 		if(i == 0 and len(tabAnnee[i])==1 and annee < tabAnnee[i][0]):
 			trouveIndiceAnnee = True
 			indiceAnnee = i
-		if(i == nbAnnee-1 and len(tabAnnee[i])==1 and annee >= tabAnnee[i][0]):
+		if(i == nbAnnee-1 and len(tabAnnee[i])==1 and annee > tabAnnee[i][0]):
 			trouveIndiceAnnee = True
 			indiceAnnee = i
-		if(len(tabAnnee[i])==2 and annee >= tabAnnee[i][0] and annee < tabAnnee[i][1]):
+		if(len(tabAnnee[i])==2 and annee >= tabAnnee[i][0] and annee <= tabAnnee[i][1]):
 			trouveIndiceAnnee = True
 			indiceAnnee = i
 
@@ -239,7 +239,7 @@ ax.set_ylabel(texteOrdonneeGlobal, fontsize = tailleOrdonnee)
 ax.set_xlabel(texteAbscisseGlobal, fontsize = tailleAbscisse)
 ax.set_title(titre, fontsize = tailleTitre)
 ax.set_xticks(ind)
-ax.set_yticks(np.arange(0, maxSize, 1000.0))
+ax.set_yticks(np.arange(0, maxSize, 100.0))
 ax.set_xticklabels(index)
 
 fig.tight_layout()

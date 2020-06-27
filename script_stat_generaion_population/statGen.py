@@ -1,15 +1,16 @@
 import csv
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 import sys
 import time
 
 start_time = time.time()
 
 #represente les tranches de population
-tabListPop = [[0, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
+tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
 
-figsize = (12, 8)
+figsize = (12, 10)
 
 tailleTitre = 25
 
@@ -34,14 +35,12 @@ def is_integer(n):
     else:
         return float(n).is_integer()
 
-#dictionnaire qui contient toutes les stations et un tableau de booléen pour chaque génération d'emetteur 
-dictionnaireSupport = {}
+#dictionnaire l'identifiant d'un support et un tableau de booléen pour chaque génération d'émetteur
+dictionnaireSupport = {} #de la forme {id_sup: [Bool, Bool, Bool, Bool]}
 
 with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
     file_readerEme = csv.reader(FileEme, delimiter=';')
     next(file_readerEme)
-    
-    numSup = -1
     tabGen = [False, False, False, False]
 
     for emetteur in file_readerEme:
@@ -82,13 +81,13 @@ with open('../script/tables/getPopCodePostal.csv', 'r', encoding='latin-1') as F
 
             if i == nbListPop - 1 and habitants>=tabListPop[i][0]:
                 trouve = True
-                temp = row[0].split(",")
+                temp = row[0].split("-")
                 for j in temp:
                     setsPopulation[i].add(j)
 
             elif(habitants>=tabListPop[i][0] and habitants<tabListPop[i][1]):
                 trouve = True
-                temp = row[0].split(",")
+                temp = row[0].split("-")
                 for j in temp:
                     setsPopulation[i].add(j)
             i += 1
@@ -159,6 +158,17 @@ def toutEmetteurConfondus():
     plt.title(label = titre, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+
+    maxHauteur = 0
+
+    for i in range(nbListPop):
+        sumColumn = 0
+        for j in range(4):
+            sumColumn+= tabGeneration[j][i]
+        if(sumColumn>maxHauteur):
+            maxHauteur = sumColumn
+
+    plt.yticks(np.arange(0, maxHauteur*1.05, 25.0))
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenTous.png')
 
@@ -233,6 +243,18 @@ def emetteurGenMax():
     plt.title(label = titreMax, fontsize = tailleTitre)
     plt.ylabel(texteOrdonnee, fontsize = tailleOrdonnee)
     plt.xlabel(texteAbscisse, fontsize = tailleAbscisse)
+
+    maxHauteur = 0
+
+    for i in range(nbListPop):
+        sumColumn = 0
+        for j in range(4):
+            sumColumn+= tabGeneration[j][i]
+        if(sumColumn>maxHauteur):
+            maxHauteur = sumColumn
+
+    plt.yticks(np.arange(0, maxHauteur*1.05, 25.0))
+
     plt.tight_layout()
     plt.savefig('../statistiques/emetteur_population_support/StatToutOperateurConfondu/statPopGenMax.png')
 
