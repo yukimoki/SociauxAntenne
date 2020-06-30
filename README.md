@@ -75,3 +75,22 @@ New tables only include emitters with type is in *typeEMRfilter.txt* or other el
 | ./tables/SUP_?.txt | Dir with all tables to sort (SUPPORT, ANTENNE, STATION, EMETTEUR) |
 | *./tables/SUP_EXPLOITANT.txt* | Link between id and name of operator |
 | ./typeEMRfilter    | File with all emitters types to filter (initialy mobile network)|
+
+
+
+## Pour les scripts suivants : 
+
+- densite_pop_pauvre.py
+
+- pop_pauvre_carre100.py
+
+- pop_pauvre_carre100_cumulatif.py
+
+- dist_moyenne_support.py
+
+
+
+#### La documentation se trouve dans le dossier script dans doc_pop_pauvre.pdf
+
+
+
