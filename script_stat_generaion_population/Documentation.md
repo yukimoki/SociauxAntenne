@@ -76,15 +76,17 @@ texteOrdonnee = "Nombre d'habitants (en milliers)"
 
 #### tabListPop
 
- tableau d'intervalles de population. Les intervalles de population sont sur l'axe des abscisses. **La dernière valeur est obligatoire et n'est pas une paire**. Elle correspond au dernier intervalle qui correspond à toutes les régions dont le nombre d'habitants est supérieur à 400 000 habitants de base.
+ tableau d'intervalles de population. Les intervalles de population sont sur l'axe des abscisses. **La dernière valeur peut être une paire** . Ici elle ne l'ait pas et correspond  à toutes les communes dont le nombre d'habitants est supérieur à 400 000 habitants de base.
 
 **Vous pouvez avoir des intervalles qui ne se suivent** pas comme :
 
 ```python
-tabListPop = [[1, 2], [9, 10], [11]]
+tabListPop = [[1, 2], [9, 10], [11, 15]]
 ```
 
-**Les valeurs entre ces deux intervalles ne sont pas pris en compte**. SI vous voulez les valeurs entre il suffit d'ajouter l'intervalle qui correspond aux valeurs entre les deux.  
+**Les valeurs entre 2 et  9 ne sont pas pris en compte par exemple**. SI vous voulez les valeurs entre il suffit d'ajouter l'intervalle qui correspond aux valeurs entre les deux.  
+
+Aussi, **la valeur supérieure d'un intervalle n'est pas pris en compte**. Si vous avez [0, 10] par exemple on ne prendra compte que 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 mais pas 10.
 
 #### figsize
 
@@ -188,8 +190,9 @@ Les deux graphiques sont les suivants:
 ### Variables modifiables
 
 ```python
-tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
-tabAnnee = [[2011], [2011, 2014], [2014, 2017], [2017]]
+tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [80000, 100000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
+tabAnnee = [[2011, 2014], [2015, 2017], [2017]]
+tabCouleur = ["yellow", "orange", "red"]
 generation = "LTE"
 figsizeNombres = (13, 10)
 figsizePourcent = (15, 10)
@@ -208,7 +211,7 @@ tailleAbscisse = 15
 
 ### Exemple de graphique généré par evolutionGenGlobalTous.py avec explication des variables
 
-![](C:\Users\angel\Documents\SociauxAntenne\script_stat_generaion_population\images_descriptif\explicationGraphEvolutionrGenTous.png)
+![](C:\Users\angel\Documents\SociauxAntenne\script_stat_generaion_population\images_descriptif\explicationEvolutionGenGlobal.png)
 
 <div style="page-break-after: always; break-after: page;"></div>
 
@@ -216,21 +219,25 @@ tailleAbscisse = 15
 
 #### Variables différentes
 
-##### generation
+##### generation:
 
 Correspond à la génération d'émetteurs que l'on veut étudier. Dans la table EMETTEUR.csv "LTE" correspond à la 4G.
 
 Cette variable permettra d'obtenir les mêmes graphiques pour la 5G quand les opérateurs commenceront à installer leur émetteurs ou bien pour les générations précédentes si l'on prend les bons intervalles d'années.
 
-##### tabAnnee
+##### tabAnnee:
 
 Correspond à un tableau de tableau qui correspond aux intervalles d'années que l'on souhaite étudier.
 
-**La première** et **la dernière** valeur ne sont pas des paires. 
+**La première** et **la dernière** valeur peuvent ne pas être des paires mais des intervalles. 
 
 La première correspond à l'intervalle pour lesquels la date de mise en service de l'émetteur est inférieur strictement à la première valeur.
 
-La dernière correspond de manière analogue à l'intervalle qui contient tous les émetteurs mis en service après la dernière valeur
+La dernière correspond de manière analogue à l'intervalle qui contient tous les émetteurs mis en service après la dernière valeur.
+
+**tabCouleur:**
+
+Assoscie à chaque barre d'année une couleur. Si vous ne voulez pas vous prendre la tête à choisir les couleurs vous pouvez retirer le tableau et les couleurs seront choisie au hasard.
 
 #### Variables similaires à statGen.py
 
@@ -257,8 +264,9 @@ Les deux graphiques sont les suivants:
 ### Variables Modifiables
 
 ```python
-tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
-tabAnnee = [[2011], [2011, 2014], [2014, 2017], [2017]]
+tabListPop = [[0, 50], [50, 100], [100, 250], [250, 500], [500, 1000], [1000, 5000], [5000, 10000], [10000, 20000], [20000, 40000], [40000, 60000], [60000, 80000], [80000, 100000], [100000, 120000], [120000, 140000], [140000, 200000], [200000, 400000], [400000]]
+tabAnnee = [[2011, 2014], [2015, 2017], [2017]]
+tabCouleur = ["yellow", "orange", "red"]
 generation = "LTE"
 figsizeNombres = (13, 10)
 figsizePourcent = (15, 10)
@@ -415,3 +423,106 @@ C'est exactement les mêmes que pour **evolutionGenRegionTous.py** et **evolutio
 ### Différence entre evolutionGenRegionAncien.py et evolutionGenCommuneAncien.py
 
 C'est toujours la même chose que pour **evolutionGenRegionTous.py** et **evolutionGenCommuneTous.py**.
+
+<div style="page-break-after: always; break-after: page;"></div>
+
+## statCouvertureGlobal.py
+
+```
+Créée un graphique dans le dossier /statistiques/emetteur_population_support/StatParAnnee.
+
+Le graphique est similaire à ceux générés par evolutionGenRegionAncien.py et evolutionGenCommuneAncien.py.
+Ici on regroupe les communes par population et on génère un graphiques qui montre la couverture global de la france par à la taille des communes.
+```
+
+### Variables modifiables
+
+```python
+generation = "LTE"
+figsize = (12, 10)
+titre  = "Pourcentage d'émetteurs mis en service par commune et année"
+tailleTitre = 25
+axeOrdonnee = "Pourcentage d'émetteurs"
+axeAbscisse = "Année"
+tailleOrdonnee = 15
+tailleAbscisse = 15
+tabListPop = [[10, 100], [100, 200], [200, 300], [300, 400], [400, 500], [500, 750], [750, 1000], [1000, 2500], [2500, 5000], [5000, 10000], [10000, 25000], [25000, 50000], [50000, 100000], [100000, 250000], [250000]]
+tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
+linestyles = ["-", "--", "-.", "--", "-", "--", "-.", "--", "-", "--", "--", "-.", "--", "-", "--", "-.", "--", "-", "--"]
+markers = ["o", "^", "v", "<", ">", "1", "2","3", "4", "8", "s", "p", "P", "*", "D", "x", "X"]
+texteSauvegarde = "statCouvertureTous.png"
+```
+
+### À quoi correspondent ces variables ?
+
+C'est exactement les mêmes que pour tous les autres scripts.
+
+<div style="page-break-after: always; break-after: page;"></div>
+
+## seuilAtteintCommuneTous.py et seuilAtteintCommuneAncien.py
+
+```
+Chaque script créée un graphique dans le dossier /statistiques/emetteur_population_support/StatParAnnee.
+
+Le premier, seuilAtteintCommuneTous.py, prends en compte tous les émetteurs et le second, seuilAtteintCommuneAncien.py, ne compte q'un seul émetteur par support et celui avec la date de mise en service la plus ancienne.
+```
+
+### Variables modifiables
+
+```python
+generation = "LTE"
+seuil = 50
+figsize = (12, 10)
+titre  = "Année où le seuil de " + str(seuil) + "% d'émetteurs à été atteint par commune"
+tailleTitre = 20
+axeOrdonnee = "Population"
+axeAbscisse = "Année"
+tailleOrdonnee = 15
+tailleAbscisse = 15
+tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
+nomsCommunes = ['Chancia', 'Riboux', 'Change', 'Aresches', 'Verrie', 'Zermezeele', 'Vernay', 'Xaintray', 'Yrouerre', 'Saint-Élie']
+texteSauvegarde = "statSeuilCommunesRepresentatives.png"
+```
+
+### À quoi correspondent ces variables ?
+
+Toutes les variables aux noms similaires aux autres scripts font la même chose.
+
+### Variable différentes
+
+- **seuil:** Seuil en pourcentage, permet de savoir quand les communes dans **nomsCommunes** ont atteint ce seuil et pour quelle année de **tabAnnee**.
+
+<div style="page-break-after: always; break-after: page;"></div>
+
+## seuilAtteintGlobal.py
+
+```
+Créée un graphique dans le dossier /statistiques/emetteur_population_support/StatParAnnee.
+
+Le graphique est similaire à ceux générés par seuilAtteintCommuneTous.py.
+Ici on regroupe les communes par population et on génère un graphiques qui montre l'année où le seuil à été atteint pour chaque taille de commune.
+```
+
+### Variables modifiables
+
+```python
+generation = "LTE"
+figsize = (12, 10)
+titre  = "Pourcentage d'émetteurs mis en service par commune et année"
+tailleTitre = 25
+axeOrdonnee = "Pourcentage d'émetteurs"
+axeAbscisse = "Année"
+tailleOrdonnee = 15
+tailleAbscisse = 15
+tabListPop = [[10, 100], [100, 200], [200, 300], [300, 400], [400, 500], [500, 750], [750, 1000], [1000, 2500], [2500, 5000], [5000, 10000], [10000, 25000], [25000, 50000], [50000, 100000], [100000, 250000], [250000]]
+tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
+linestyles = ["-", "--", "-.", "--", "-", "--", "-.", "--", "-", "--", "--", "-.", "--", "-", "--", "-.", "--", "-", "--"]
+markers = ["o", "^", "v", "<", ">", "1", "2","3", "4", "8", "s", "p", "P", "*", "D", "x", "X"]
+texteSauvegarde = "statAtteintGlobal.png"
+```
+
+### À quoi correspondent ces variables ?
+
+C'est exactement les mêmes que pour tous les autres scripts.
+
+<div style="page-break-after: always; break-after: page;"></div>

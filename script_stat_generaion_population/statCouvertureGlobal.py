@@ -24,7 +24,7 @@ tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
 linestyles = ["-", "--", "-.", "--", "-", "--", "-.", "--", "-", "--", "--", "-.", "--", "-", "--", "-.", "--", "-", "--"]
 markers = ["o", "^", "v", "<", ">", "1", "2","3", "4", "8", "s", "p", "P", "*", "D", "x", "X"]
 
-texteSauvegarde = "statCouvertureTous.png"
+texteSauvegarde = "statAtteintGlobal.png"
 
 nbListPop = len(tabListPop)
 setsPopulation  = [set() for i in range(nbListPop)]
