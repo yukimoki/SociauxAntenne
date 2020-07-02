@@ -24,7 +24,7 @@ tabAnnee = [2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020]
 linestyles = ["-", "--", "-.", "--", "-", "--", "-.", "--", "-", "--", "--", "-.", "--", "-", "--", "-.", "--", "-", "--"]
 markers = ["o", "^", "v", "<", ">", "1", "2","3", "4", "8", "s", "p", "P", "*", "D", "x", "X"]
 
-texteSauvegarde = "statCouvertureTous.png"
+texteSauvegarde = "statAtteintGlobal.png"
 
 nbListPop = len(tabListPop)
 setsPopulation  = [set() for i in range(nbListPop)]
@@ -63,8 +63,7 @@ with open('../script/tables/finalDB/SUPPORT.csv', 'r', encoding='latin-1') as Fi
     file_readerSup = csv.reader(FileSup, delimiter=';')
     next(file_readerSup)
     for support in file_readerSup:
-        for i in range(nbListPop):
-            codePostauxSupportsConcernees[support[0]] = support[5]
+        codePostauxSupportsConcernees[support[0]] = support[5]
 
 with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as FileEme:
     file_readerEme = csv.reader(FileEme, delimiter=';')

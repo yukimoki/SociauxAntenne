@@ -220,7 +220,10 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 
 	maxSize += maxSize*0.02
 
-	bar_plot(ax, data, colors = tabCouleur, total_width=1, single_width=0.9)
+	if(len(tabCouleur)>1):
+		bar_plot(ax, data, colors = tabCouleur, total_width=1, single_width=0.9)
+	else:
+		bar_plot(ax, data, total_width=1, single_width=0.9)
 
 	ax.set_ylabel(texteOrdonneeGlobal, fontsize = tailleOrdonnee)
 	ax.set_xlabel(texteAbscisseGlobal, fontsize = tailleAbscisse)
@@ -263,7 +266,10 @@ with open('../script/tables/finalDB/EMETTEUR.csv', 'r', encoding='latin-1') as F
 
 	maxPourcent += maxPourcent*0.02
 
-	bar_plot(ax, dataPourcent, colors = tabCouleur, total_width=1, single_width=0.9)
+	if(len(tabCouleur)>1):
+		bar_plot(ax, data, colors = tabCouleur, total_width=1, single_width=0.9)
+	else:
+		bar_plot(ax, data, total_width=1, single_width=0.9)
 
 	ax.set_ylabel(texteOrdonneePourcentage, fontsize = tailleOrdonnee)
 	ax.set_xlabel(texteAbscissePourcentage, fontsize = tailleAbscisse)
