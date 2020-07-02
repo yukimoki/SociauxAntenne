@@ -6,11 +6,15 @@ from progress.bar import Bar
 import matplotlib.pyplot as plt
 import stat
 
+# Initialisation des dataframes
 df_carres_sup = pd.read_csv('tables/finalDB/CarresDistSupProche.csv', delimiter=";", usecols=["IDcrs", "IdSupProchePt1", "DistSupProchePt1", "IdSupProchePt2", "DistSupProchePt2", "IdSupProchePt3", "DistSupProchePt3", "IdSupProchePt4", "DistSupProchePt4"])
 df_carres_socio = pd.read_csv('tables/finalDB/StatsSocioCarres.csv', delimiter="\t", usecols=["LAEA", "poptot", "pcmenagespauvres"])
 
+# Jointure des df carres dist et socio
 df_carres = df_carres_sup.join(df_carres_socio.set_index('LAEA'), on='IDcrs')
 df_carres = df_carres.loc[df_carres['poptot'] > 100]
+
+# Traitement
 data_dict = {}
 bar = Bar('traitement carres', suffix='%(index)d/%(max)d : %(percent)d%% [%(elapsed_td)s]', max=len(df_carres)-1)
 for idx, carre in df_carres.iterrows():
@@ -25,6 +29,7 @@ df_stat = pd.DataFrame.from_dict(data=data_dict, columns=['POP_TOTAL', 'POP_PAUV
 print(df_stat)
 df_stat.to_csv('tables/finalDB/tmp_stat.csv', sep=";")
 # ****************************************************************************
+# Affichage
 
 df_stat = pd.read_csv('tables/finalDB/tmp_stat.csv', sep=";", dtype='float64', header=0, names=['POP_CARRE', 'POP_TOTAL', 'POP_PAUVRE'])
 df_stat.sort_values(by=['POP_CARRE'], inplace=True)

@@ -33,7 +33,7 @@ df_stat = pd.DataFrame.from_dict(data=hab_by_holder, columns=['POP_TOTAL', 'DENS
 print(df_stat)
 df_stat.to_csv('tables/finalDB/nb_hab_par_ant.csv', sep=";")
 # ****************************************************************************
-
+# Menu 
 df_stat = pd.read_csv('tables/finalDB/nb_hab_par_ant.csv', index_col=0, sep=";", dtype='float64')
 print(df_stat)
 titre = sys.argv[1]
