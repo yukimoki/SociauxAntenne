@@ -25,15 +25,15 @@ carres_df = cAll_df.join(cStats_df.set_index('LAEA'), on='IDcrs')
 def genData(seuil=0.5):
     """
     in: seuil=float,
-    out: tableau [distance] 
+    out: nbHabitant = int
+    nbHabitant est le nombre d'Habitant du pour un pourcentage de population jeune donne
     """
     
     nbHabitant=0
     nbcarre=0
     for index, row in carres_df.iterrows():
-        #bar.next()
-        popc= row['poptot']
-        jjeunes = row['pcjeunes1525']*100
+        popc= row['poptot']                 #population du carre
+        jeunes = row['pcjeunes1525']*100    #pourcentage de jeune du carre
         if (jeunes<seuil and jeunes>=seuil-1):
             nbHabitant+=popc
             nbcarre+=1    
@@ -51,7 +51,7 @@ for i  in range(1,31):
     df.append(genData(seuil=i))
     print(len(df))
 grph=pd.DataFrame(df, columns=['Population'], dtype=float)
-grph.to_csv(r'pcnonjeunes_15pc100m.csv', sep='\t', encoding='utf-16', index=False)
+grph.to_csv(r'repatitionPopulationjeune15-25.csv', sep='\t', encoding='utf-16', index=False)
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
 
 

@@ -26,7 +26,8 @@ carres_df = cAll_df.join(cStats_df.set_index('LAEA'), on='IDcrs')
 def rep():
     """
     in: seuil=float,
-    out: tableau [distance] 
+    out: data = tableau [float] 
+    cette fonction ajoute dans un tableau la disance à tout les supports les plus proche
     """
     data = []
     nbcarre=0
@@ -50,12 +51,12 @@ df = []
 fig = plot.figure()
 ax = fig.add_subplot(1, 1, 1)
 
-y_min = 0
-y_max = 10000
+y_min = 0       #indique la valeur la plus basse de la figure generee
+y_max = 10000   #indique la valeur la plus haute de la figure generee
 
 plot.ylim(y_min,y_max)
 
-grid_y_ticks = np.arange(y_min, y_max, 100)
+grid_y_ticks = np.arange(y_min, y_max, 100) #permet d'afficher une grille
 
 ax.set_yticks(grid_y_ticks , minor=True)
 
@@ -63,10 +64,10 @@ ax.grid(which='minor', alpha=100, linestyle='--')
 
 df.append(rep())
 print(len(df))
-plot.boxplot(df)
+plot.boxplot(df)        #cree une boite à moustache
 plot.grid(which='both')
 plot.ylabel("Distance au support le plus proche (m)")
-plot.savefig('reppop.pdf')
+plot.savefig('reppop.pdf')      #sauvegarde la figure avec le nom mit en parametre
 plot.show()
 
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
