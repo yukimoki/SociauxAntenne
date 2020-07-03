@@ -109,7 +109,7 @@ for i in range(0,30):
     moy.append(somme(df[i]))
 moyenne(moy)
 print(moy)
-plot.boxplot(df)    #cree uns boite à moustache 
+plot.boxplot(df)    #cree une boite à moustache 
 plot.grid()
 plot.xlabel('pourcentage de la population jeune')
 plot.ylabel("Distance au support le plus proche (m)")

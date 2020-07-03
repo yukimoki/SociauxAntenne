@@ -33,14 +33,10 @@ def rep():
     nbcarre=0
     
     for index, row in carres_df.iterrows():
-        #bar.next()
-        popc= row['poptot']
         for i in range (1,5): # 4 points du carré
             dist = int(row['DistSupProchePt'+str(i)]) # distance de l'antenne au point
             data.append(dist)
         nbcarre+=1
-        
-    #bar.finish()
     print(nbcarre)
     return data
 

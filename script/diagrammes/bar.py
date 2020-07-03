@@ -72,7 +72,7 @@ def plotchart(df):
 
 # Main
 start_time = time.time()
-df = genData(detail=100, stat='pcjeunes1525', threshold=-0.08, max_search_dist=10000)
+df = genData(detail=100, stat='pcjeunes1525', threshold=-0.08, max_search_dist=10000)  
 print("Temps d'exécution: %s secondes" % (time.time() - start_time))
 df.to_csv(r'pcnonjeunes_15pc100m.csv', sep='\t', encoding='utf-16', index=False)
 #plotchart(df)

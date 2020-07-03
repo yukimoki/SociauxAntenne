@@ -62,7 +62,7 @@ Permet de générer le graphique du nombre de support en fonction du nombre d'ha
 
 # OnlyMobile.py
 
-! the script must be executed with pyton3 in his own dir
+! the script must be executed with python3 in his own dir
 
 The script takes all *SUP_\** tables in tables dir and wrtite new ones *MOBILE_\** in the same dir.
 New tables only include emitters with type is in *typeEMRfilter.txt* or other elements holding this type of emitter.
@@ -92,7 +92,47 @@ New tables only include emitters with type is in *typeEMRfilter.txt* or other el
 
 #### La documentation se trouve dans le dossier script dans doc_pop_pauvre.pdf
 
+### Les scripts suivant se trouvent dans script\diagrammes  
 
+#### bar.py, repartitionJeune.py, nbHabitant.py, repartitionHabitant.py
+
+Pour exécuter ces scripts il vous faudra les tables CarresDistSupProche.csv et StatSocioCarres.csv que vous trouverez [ici](http://barthes.enssib.fr/inriatel/) dans le fichier compressé finalDB. Il faut aussi indiquer le chemin qui permet d'avoir accès à ces tables, par défaut il faut les placer dans le dossier diagrammes pour que tout fonction.
+
+#### bar.py
+
+Permet de générer des fichier.csv comportant des intervalles de distance avec la population associé.
+
+##### paramètres modifiables:
+
+dans le main il est possible de modifier les paramètres de la fonction gendata() 
+
+detail: indique le nombre d'intervalle de distance que l'on souhaite
+
+stat: stat peut-être remplacé par les colonnes de la table StatSocioCarres.csv (poptot, pcmenproprios, pcmenagespauvres, pcenfants0a14, pcjeunes1525, pcmoinsde25ans, pcadultes, pcmineurs, pcsup65)
+
+ threshold: indique la valeur minimum que doit avoir stat afin que le carré soit compter
+
+#### repatitionJeune.py
+
+Génère des boites à moustache répertoriant les distances au support le plus proche en fonction du pourcentage de jeune dans le carré
+
+##### variables modifiables
+
+y_min : change la hauteur à laquelle commence les boites à moustache
+
+y_max : change la hauteur à laquelle termine les boites à moustache
+
+grid_y_ticks = np.arange(y_min, y_max, 100) il est possible de changer le dernier paramètre afin de changer le pas de la grille
+
+
+
+#### nbHabitant.py
+
+Permet de générer des fichier.csv comportant le nombre d'habitant par rapport au pourcentage de 15-25 ans dans le carré.
+
+#### repartitionHabitant.py
+
+génère une boita à moustache répertoriant les distances au support le plus proche 
 
 ### Pour obtenir les graphiques sur les émetteurs, supports et la population la documentation se trouve [ici](https://github.com/yukimoki/SociauxAntenne/blob/master/script_stat_generaion_population/Documentation.md) 
 
